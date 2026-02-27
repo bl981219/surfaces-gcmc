@@ -12,7 +12,7 @@ system:
     Co: 58.9332
 
 thermodynamics:
-  temperature: 1073 # For surface_thermo
+  temperature: 1073 # For surface_thermo and competing_phases_identifier
   temperature_range: [700, 1500]
   bulk_pressure_range: [-30, 20] # log(P_O2) in atm for bulk phase diagram
   surface_pressure_range: [-12, 12] # log(P_O2) in atm for surface phase diagram

@@ -2,4 +2,4 @@
 *_OUTCAR
 *_CONTCAR*
 slurm-*.out
-*.poscar
+output/
