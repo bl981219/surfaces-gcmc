@@ -1,0 +1,5 @@
+# Ignore VASP and M3GNet outputs
+*_OUTCAR
+*_CONTCAR*
+slurm-*.out
+*.poscar
