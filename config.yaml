@@ -1,0 +1,43 @@
+# config.yaml
+# Master configuration for Surface GCMC and Thermodynamics
+
+system:
+  elements: ["La", "Fe", "O", "Sr", "Co"]
+  target_stoichiometry: [16, 27, 81, 11] # LSCF bulk stoichiometry
+  masses: 
+    La: 138.9055
+    Fe: 55.847
+    O: 15.9994
+    Sr: 87.62
+    Co: 58.9332
+
+thermodynamics:
+  temperature: 1073 # K
+  pressure_range: [-30, 5] # log(P_O2) in atm
+  o2_overbinding_correction: 1.186 # eV per O molecule at temperature
+  
+gcmc_settings:
+  vasp_cmd: "mpirun -n 8 vasp_gam > vasp.out"
+  iterations: 5000
+  mc_ratio: 0.5
+  gcmc_ratio: 0.5
+  # Z-axis fractional bounds for allowed GCMC/MC moves
+  region_gcmc_z: [0.73, 1.0] 
+  region_mc_z: [0.23, 1.0]
+  # Move probabilities
+  displace_ratio: 0.05
+  change_ratio: 0.15
+  remove_ratio: 0.3
+  insert_ratio: 0.3
+
+# Bulk reference energies (eV/unit) for linear programming
+bulk_references:
+  La2O3: -41.834
+  Fe: -8.40925
+  FeO: -13.24117
+  Fe2O3: -33.1211
+  SrO: -12.08075
+  SrO2: -17.310
+  SFO: -856.6913
+  LFO: -1019.4793
+  ABO3: -956.9898
