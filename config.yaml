@@ -13,8 +13,10 @@ system:
 
 thermodynamics:
   temperature: 1073 # K
-  pressure_range: [-30, 5] # log(P_O2) in atm
+  bulk_pressure_range: [-30, 5] # log(P_O2) in atm for bulk phase diagram
+  surface_pressure_range: [-12, 12] # log(P_O2) in atm for surface phase diagram
   o2_overbinding_correction: 1.186 # eV per O molecule at temperature
+  m3gnet_o_ref: -6.0897 # M3GNet reference energy for O atom at 1073K (use -5.8366 for 873K)
   
 gcmc_settings:
   vasp_cmd: "mpirun -n 8 vasp_gam > vasp.out"

@@ -1,5 +1,5 @@
 # src/gcmc_sampler.py
-# Author: Mengren Liu
+# Author: Mengren Bill Liu
 
 from pymatgen.core import Structure
 from pymatgen.io.vasp import Poscar, Outcar

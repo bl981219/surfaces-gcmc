@@ -1,5 +1,5 @@
 # src/bulk_thermo.py
-# Author: Bill Liu
+# Author: Mengren Bill Liu
 
 import yaml
 import argparse
@@ -28,7 +28,7 @@ def main(config_path):
 
     T = config['thermodynamics']['temperature']
     overbinding = config['thermodynamics']['o2_overbinding_correction']
-    P_min, P_max = config['thermodynamics']['pressure_range']
+    P_min, P_max = config['thermodynamics']['bulk_pressure_range']
     P_array = np.linspace(P_min, P_max, 100)
     
     refs = config['bulk_references']
