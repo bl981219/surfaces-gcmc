@@ -12,11 +12,13 @@ system:
     Co: 58.9332
 
 thermodynamics:
-  temperature: 1073 # K
-  bulk_pressure_range: [-30, 5] # log(P_O2) in atm for bulk phase diagram
+  temperature: 1073 # For surface_thermo
+  temperature_range: [700, 1500]
+  bulk_pressure_range: [-30, 20] # log(P_O2) in atm for bulk phase diagram
   surface_pressure_range: [-12, 12] # log(P_O2) in atm for surface phase diagram
-  o2_overbinding_correction: 1.186 # eV per O molecule at temperature
+  o2_overbinding_correction: 1.186 # eV per O molecule at temperature for MLIAP
   m3gnet_o_ref: -6.0897 # M3GNet reference energy for O atom at 1073K (use -5.8366 for 873K)
+  mu_0_o2: -5.23 # Experimental value for O2 binding energy
   chemical_potentials: # Used for GCMC Metropolis acceptance (eV)
     La: -12.5173
     Fe: -7.9327
@@ -42,12 +44,42 @@ gcmc_settings:
 
 # Bulk reference energies (eV/unit) for linear programming
 bulk_references:
-  La2O3: -41.834
-  Fe: -8.40925
-  FeO: -13.24117
-  Fe2O3: -33.1211
-  SrO: -12.08075
-  SrO2: -17.310
-  SFO: -856.6913
-  LFO: -1019.4793
-  ABO3: -956.9898
+  La2O3:
+    energy: -41.833
+    stoich: {La: 2, O: 3}
+  La0Sr4Fe2O8:
+    energy: -88.295982
+    stoich: {Sr: 4, Fe: 2, O: 8}
+  La1Sr3Fe2O8:
+    energy: -94.561150
+    stoich: {La: 1, Sr: 3, Fe: 2, O: 8}
+  La2Sr2Fe2O8:
+    energy: -100.375595
+    stoich: {La: 2, Sr: 2, Fe: 2, O: 8}
+  La3Sr1Fe2O8:
+    energy: -104.970154
+    stoich: {La: 3, Sr: 1, Fe: 2, O: 8}
+  Fe:
+    energy: -8.40925
+    stoich: {Fe: 1}
+  FeO:
+    energy: -13.24117
+    stoich: {Fe: 1, O: 1}
+  Fe2O3:
+    energy: -33.1208725
+    stoich: {Fe: 2, O: 3}
+  SrO:
+    energy: -12.08075
+    stoich: {Sr: 1, O: 1}
+  SrO2:
+    energy: -17.3102055
+    stoich: {Sr: 1, O: 2}
+  SFO:
+    energy: -31.734716
+    stoich: {Sr: 1, Fe: 1, O: 3}
+  LFO:
+    energy: -37.567883
+    stoich: {La: 1, Fe: 1, O: 3}
+  ABO3:
+    energy: -957.450012
+    stoich: {La: 16, Fe: 27, O: 81, Sr: 11}
