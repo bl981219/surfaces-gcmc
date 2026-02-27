@@ -5,10 +5,11 @@ A computational workflow for predicting the surface reconstructions, point defec
 This package uses a hybrid approach combining Machine Learning Interatomic Potentials (M3GNet) and Density Functional Theory (DFT) to accelerate Grand Canonical Monte Carlo (GCMC) sampling of slab models.
 
 ## Overview
-This repository contains three main modules:
-1. **Bulk Thermodynamics (`bulk_thermo.py`)**: Uses linear programming to calculate the bulk phase diagram of complex oxides (e.g., LaSrFeO3) against competing secondary phases as a function of temperature and $P_{\mathrm{O_2}}$.
-2. **GCMC Surface Sampling (`gcmc_sampler.py`)**: Performs Grand Canonical Monte Carlo sampling of surface atoms and vacancies. It uses M3GNet as a rapid surrogate model to pre-relax and screen configurations before validating ground-state structures with VASP.
-3. **Surface Phase Diagram (`surface_thermo.py`)**: Analyzes the converged GCMC trajectories and bulk reference energies to construct the final surface phase diagram (Grand Potential vs. oxygen chemical potential/overpotential).
+This repository contains four main modules:
+1. **Bulk Thermodynamics (`bulk_thermo.py`)**: Uses linear programming to calculate the bulk phase diagram of complex oxides (e.g., LaSrFeO$_3$) against competing secondary phases as a function of temperature and $P_{\mathrm{O_2}}$.
+2. **Competing Phases Identifier (`competing_phases_identifier.py`)**: Evaluates the stability of specific secondary phases along a given chemical potential trajectory (provided as JSON data) to identify precise precipitation driving forces.
+3. **GCMC Surface Sampling (`gcmc_sampler.py`)**: Performs Grand Canonical Monte Carlo sampling of surface atoms and vacancies. It uses M3GNet as a rapid surrogate model to pre-relax and screen configurations before validating ground-state structures with VASP.
+4. **Surface Phase Diagram (`surface_thermo.py`)**: Analyzes the converged GCMC trajectories and bulk reference energies to construct the final surface phase diagram (Grand Potential vs. oxygen chemical potential/overpotential).
 
 ## Installation
 
