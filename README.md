@@ -6,7 +6,7 @@ This package uses a hybrid approach combining Machine Learning Interatomic Poten
 
 ## Overview
 This repository contains four main modules:
-1. **Bulk Thermodynamics (`bulk_thermo.py`)**: Uses linear programming to calculate the bulk phase diagram of complex oxides (e.g., $\text{LaSrFeO}_3$) against competing secondary phases as a function of temperature and $P_{\text{O}_2}$.
+1. **Bulk Thermodynamics (`bulk_thermo.py`)**: Uses linear programming to calculate the bulk phase diagram of complex oxides (e.g., LaSrFeO<sub>3</sub>) against competing secondary phases as a function of temperature and *P*<sub>O<sub>2</sub></sub>.
 2. **Competing Phases Identifier (`competing_phases_identifier.py`)**: Evaluates the stability of specific secondary phases along a given chemical potential trajectory (provided as JSON data) to identify precise precipitation driving forces.
 3. **GCMC Surface Sampling (`gcmc_sampler.py`)**: Performs Grand Canonical Monte Carlo sampling of surface atoms and vacancies. It uses M3GNet as a rapid surrogate model to pre-relax and screen configurations before validating ground-state structures with VASP.
 4. **Surface Phase Diagram (`surface_thermo.py`)**: Analyzes the converged GCMC trajectories and bulk reference energies to construct the final surface phase diagram (Grand Potential vs. oxygen chemical potential/overpotential).
