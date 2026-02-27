@@ -1,5 +1,5 @@
 # src/surface_thermo.py
-# Author: Mengren Liu
+# Author: Mengren Bill Liu
 
 import os
 import yaml
