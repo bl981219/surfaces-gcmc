@@ -41,6 +41,9 @@ gcmc_settings:
   insert_ratio: 0.3
   gcmc_species: ["O"] # The element(s) allowed to be inserted/removed
   min_distance: 1.0   # Minimum allowed distance (Angstroms) between atoms during moves
+  iterations: 1000
+  # Hybrid Evaluation Settings
+  vasp_verification_freq: inf  # Set to 'inf' to never run VASP, or an integer like 100
 
 # Bulk reference energies (eV/unit) for linear programming
 bulk_references:
