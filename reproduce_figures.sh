@@ -9,7 +9,7 @@ echo "Identifying Competing Phases from Trajectory Data..."
 python src/competing_phases_identifier.py --config config.yaml
 
 echo "Surface Sampling"
-# Runs the GCMC sampler on the provided test POSCAR file. This will generate a trajectory JSON file in the output directory.
+# Runs the GCMC sampler on the provided test POSCAR file. This will generate a trajectory JSON file in the output directory
 python src/gcmc_sampler.py --config config.yaml --input data/test_POSCAR
 
 echo "Reproducing Surface Phase Diagram..."
