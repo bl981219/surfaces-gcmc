@@ -1,5 +1,11 @@
-# Ignore VASP and M3GNet outputs
-*_OUTCAR
-*_CONTCAR*
-slurm-*.out
+# Python packaging metadata
+*.egg-info/
+__pycache__/
+build/
+dist/
+
+# Output directories (don't upload local test data)
 output/
+
+# OS generated files
+.DS_Store

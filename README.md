@@ -10,7 +10,7 @@ This repository contains a multi-scale computational pipeline designed to predic
 
 ## Prerequisites
 * **Python 3.9+**
-* **VASP 5/6:** A licensed, compiled VASP executable accessible via your system's MPI run command.
+* **VASP 5/6:** A licensed, compiled VASP executable accessible via your system's MPI run command (required for hybrid DFT verification).
 
 ## Installation
 Clone the repository and install the package using `pip`. This will automatically install all required dependencies (`pymatgen`, `m3gnet`, `numpy`, etc.) and register the executable commands to your system.
@@ -21,49 +21,53 @@ cd surfaces-gcmc
 pip install -e .
 ```
 
-## How to Use the Pipeline
+## Quick Start (Reproducing Manuscript Figures)
+To verify your installation and reproduce the figures from the manuscript using the provided La<sub>0.6</sub>Sr<sub>0.4</sub>FeO<sub>3-δ</sub> (LSF) data, simply run the automated bash script:
+
+```bash
+bash reproduce_figures.sh
+```
+*Check the `output/` directory for the generated PNG phase diagrams and text logs.*
+
+---
+
+## Step-by-Step Pipeline Usage
+
+If you want to run the pipeline manually or adapt it for your own material, follow these steps. (The examples below use the provided 1073K test files).
 
 ### Step 1: Prepare Bulk Defect Data (Prerequisite)
-This model rigorously couples surface energies to the bulk reservoir. Before running the surface scripts on a new material, you must calculate the bulk defect formation energies using standard DFT. 
-Input these polynomial arrays into the `cation_vacancy_vs_VO` and `cation_vacancy_vs_VM` blocks of your `config.yaml`.
+This model rigorously couples surface energies to the bulk reservoir. Before running the surface scripts on a new material, you must calculate the bulk defect formation energies using standard DFT. Input these polynomial arrays into the `cation_vacancy_vs_VO` and `cation_vacancy_vs_VM` blocks of your configuration file.
 
-### Step 2: Identify Competing Phases
-Before running the surface sampling, you must evaluate the bulk stability against secondary phase precipitation. 
+### Step 2: Evaluate Bulk Thermodynamics & Competing Phases
+Before surface sampling, evaluate the bulk stability to identify which secondary phases might precipitate at the surface. 
 
 First, calculate the bulk decomposition phase diagram:
 ```bash
-surfaces-bulk-thermo --config config.yaml
+surfaces-bulk-thermo --config examples/example_config_1073K.yaml
 ```
 
-Next, run the identifier script to find the specific phases that compete with your parent material under operational conditions:
+Next, read your chemical potential trajectories to find the specific phases that compete with your parent material:
 ```bash
-surfaces-competing-phases --config config.yaml
+surfaces-competing-phases --config examples/example_config_1073K.yaml --input examples/mu_trajectory.json
 ```
-The identified competing phases serve as the rational basis for seeding your initial surface structures in the next step.
+*The identified competing phases serve as the rational basis for seeding your initial surface structures in the next step.*
 
-### Step 3: Configure the GCMC Sampler
-1. Construct an initial symmetric slab guided by the competing phases identified in Step 2, and save it as `POSCAR` in your working directory.
-2. Ensure you have your VASP `INCAR`, `KPOINTS`, and `POTCAR` files in the same directory if you plan to use the hybrid VASP verification feature.
-3. Edit `config.yaml` to define your strict Cartesian Z-boundaries for Monte Carlo moves (`region_mc_z`) and Grand Canonical insertions/removals (`region_gcmc_z`). 
-
-### Step 4: Run the Sampler (HPC / Slurm Deployment)
-Because GCMC requires thousands of evaluations, running this on a High-Performance Computing (HPC) cluster via a workload manager like Slurm is highly recommended. 
+### Step 3: Run the GCMC Sampler (HPC Recommended)
+Construct an initial symmetric slab guided by the competing phases identified in Step 2. Because GCMC requires thousands of evaluations, running this on a High-Performance Computing (HPC) cluster via a workload manager like Slurm is highly recommended. 
 
 ```bash
-surfaces-gcmc-sampler --config config.yaml --input POSCAR
+surfaces-gcmc-sampler --config examples/example_config_1073K.yaml --input examples/test_POSCAR
 ```
 *The sampler will output accepted geometries iteratively into the `output/trajectory/` directory.*
 
-### Step 5: Extract Unique Phases
-Analyze the generated `CONTCAR` files in the `output/trajectory/` folder. Cluster these geometries to identify the unique surface phases. 
+### Step 4: Extract Unique Phases & Relax
+Analyze the generated `CONTCAR` files in the `output/trajectory/` folder. Cluster these geometries to identify the unique surface phases. Perform a final, tight VASP relaxation on these unique structures and place their `CONTCAR` and `OUTCAR` files into subdirectories within a target data folder (e.g., `examples/converged_structures/SrO2/1/`). Ensure you also include a `ref/` folder containing your ideal, un-reconstructed reference slab.
 
-Perform a final, tight VASP relaxation on these unique structures and place their `CONTCAR` and `OUTCAR` files into subdirectories within a target data folder (e.g., `data_dir/SrO2/1/`). Ensure you also include a `data_dir/ref/` folder containing your ideal, un-reconstructed reference slab.
-
-### Step 6: Generate the Surface Phase Diagram
+### Step 5: Generate the Surface Phase Diagram
 Once your unique phases are organized, execute the thermodynamics script to generate the convex hull:
 
 ```bash
-surfaces-gcmc-thermo --config config.yaml --data_dir path/to/your/clustered/phases/
+surfaces-gcmc-thermo --config examples/example_config_1073K.yaml --data_dir ./examples/converged_structures/
 ```
 This script will automatically crawl your directory, apply the bulk defect calibrations and mixing entropies, and output a unified `.png` phase diagram mapping the lowest-energy surfaces.
 
