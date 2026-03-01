@@ -1,5 +1,0 @@
-[console_scripts]
-surfaces-bulk-thermo = src.bulk_thermo:main
-surfaces-competing-phases = src.competing_phases_identifier:main
-surfaces-gcmc-sampler = src.gcmc_sampler:main
-surfaces-gcmc-thermo = src.surface_thermo:main
