@@ -1,28 +1,70 @@
-# Surfaces-GCMC: Surface Thermodynamics & Reconstruction Modeler
+# Surfaces-GCMC: Predicting Surface Atomic Structures on Doped Perovskite Oxides
 
-A computational workflow for predicting the surface reconstructions, point defect concentrations, and phase stability of complex oxides under operando conditions (temperature and gas pressure). 
+This repository contains a multi-scale computational pipeline designed to predict surface reconstructions, terminations, and phase precipitates on complex doped perovskite oxides (e.g., La0.6Sr0.4FeO3-δ). It integrates Grand Canonical Monte Carlo (GCMC) sampling, Machine Learning Interatomic Potentials (ML-IAPs), and rigorous bulk-to-surface defect thermodynamics to generate highly accurate surface phase diagrams.
 
-This package uses a hybrid approach combining Machine Learning Interatomic Potentials (M3GNet) and Density Functional Theory (DFT) to accelerate Grand Canonical Monte Carlo (GCMC) sampling of slab models.
+## Core Features
+* **Accelerated GCMC Sampling:** Uses the M3GNet universal graph neural network to evaluate Monte Carlo structural moves (insertions, removals, exchanges, displacements) in-memory, bypassing expensive Density Functional Theory (DFT) steps for massive computational savings.
+* **Hybrid VASP Verification:** Automatically triggers VASP at user-defined intervals to ground the ML-IAP energies and ensure high-fidelity structural relaxation.
+* **Universal Surface Thermodynamics:** Generates multi-phase convex hull surface stability diagrams as a function of temperature ($T$), oxygen partial pressure ($P_{O_2}$), and overpotential ($\eta$). The mathematical model explicitly incorporates bulk defect chemistry, configurational mixing entropy (for fractional A/B-site doping), and self-limiting segregation principles.
 
-## Overview
-This repository contains four main modules:
-1. **Bulk Thermodynamics (`bulk_thermo.py`)**: Uses linear programming to calculate the bulk phase diagram of complex oxides (e.g., LaSrFeO<sub>3</sub>) against competing secondary phases as a function of temperature and *P*<sub>O<sub>2</sub></sub>.
-2. **Competing Phases Identifier (`competing_phases_identifier.py`)**: Evaluates the stability of specific secondary phases along a given chemical potential trajectory (provided as JSON data) to identify precise precipitation driving forces.
-3. **GCMC Surface Sampling (`gcmc_sampler.py`)**: Performs Grand Canonical Monte Carlo sampling of surface atoms and vacancies. It uses M3GNet as a rapid surrogate model to pre-relax and screen configurations before validating ground-state structures with VASP.
-4. **Surface Phase Diagram (`surface_thermo.py`)**: Analyzes the converged GCMC trajectories and bulk reference energies to construct the final surface phase diagram (Grand Potential vs. oxygen chemical potential/overpotential).
+## Prerequisites
+* **Python 3.9+**
+* `pymatgen`, `numpy`, `matplotlib`, `pyyaml`
+* `m3gnet` (for ML-IAP evaluation)
+* **VASP 5/6:** A licensed, compiled VASP executable accessible via your system's MPI run command.
 
-## Installation
+## Repository Structure
+```text
+surfaces-gcmc/
+├── src/
+│   ├── gcmc_sampler.py        # ML-accelerated Monte Carlo sampling engine
+│   └── surface_thermo.py      # Thermodynamic convex hull phase diagram generator
+├── examples/
+│   ├── example_config.yaml    # Template configuration file for testing
+│   └── test_POSCAR            # Sample starting slab
+├── config.yaml                # Master configuration file for production runs
+└── README.md
+```
 
-It is highly recommended to run this code within an isolated Conda environment.
+## How to Use the Pipeline
+
+### Step 1: Prepare Bulk Defect Data (Prerequisite)
+This model rigorously couples surface energies to the bulk reservoir. Before running the surface scripts on a new material, you must calculate the bulk defect formation energies using standard DFT. 
+You will need to compute:
+1. Cation vacancy formation energies as a function of oxygen vacancy concentration ($V_O$).
+2. Cation vacancy formation energies as a function of metal vacancy concentration ($V_M$).
+
+Input these polynomial arrays into the `cation_vacancy_vs_VO` and `cation_vacancy_vs_VM` blocks of your `config.yaml`.
+
+### Step 2: Configure the GCMC Sampler
+1. Provide an initial symmetric slab and save it as `POSCAR` in your working directory.
+2. Ensure you have your VASP `INCAR`, `KPOINTS`, and `POTCAR` files in the same directory if you plan to use the hybrid VASP verification feature.
+3. Edit `config.yaml` to define your strict Cartesian Z-boundaries for Monte Carlo moves (`region_mc_z`) and Grand Canonical insertions/removals (`region_gcmc_z`). 
+
+### Step 3: Run the Sampler (HPC / Slurm Deployment)
+Because GCMC requires thousands of evaluations, running this on a High-Performance Computing (HPC) cluster via a workload manager like Slurm is highly recommended. 
 
 ```bash
-# Clone the repository
-git clone [https://github.com/bl981219/surfaces-gcmc.git](https://github.com/bl981219/surfaces-gcmc.git)
-cd surfaces-gcmc
+# Example command to run the sampler
+python src/gcmc_sampler.py --config config.yaml --input POSCAR
+```
+*The sampler will output accepted geometries iteratively into the `output/trajectory/` directory.*
 
-# Create and activate the environment
-conda create -n surfaces_gcmc python=3.9 -y
-conda activate surfaces_gcmc
+### Step 4: Extract Unique Phases
+Analyze the generated `CONTCAR` files in the `output/trajectory/` folder. Cluster these geometries to identify the unique surface phases (e.g., Ruddlesden-Popper formations, SrO terminations, binary oxide precipitates). 
 
-# Install dependencies
-pip install -r requirements.txt
+Perform a final, tight VASP relaxation on these unique structures and place their `CONTCAR` and `OUTCAR` files into subdirectories within a target data folder (e.g., `data_dir/SrO2/1/`, `data_dir/RP_GCMC/1/`). Ensure you also include a `data_dir/ref/` folder containing your ideal, un-reconstructed reference slab.
+
+### Step 5: Generate the Phase Diagram
+Once your unique phases are organized, execute the thermodynamics script to generate the convex hull:
+
+```bash
+python src/surface_thermo.py --config config.yaml --data_dir path/to/your/clustered/phases/
+```
+This script will automatically crawl your directory, apply the bulk defect calibrations and mixing entropies, and output a unified `.png` phase diagram mapping the lowest-energy surfaces.
+
+## Authors & Citation
+**Mengren Bill Liu, Hao Tang, Jing Yang, Xiaochen Du, Rafael Gómez-Bombarelli, and Bilge Yildiz**
+
+If you use this code in your research, please cite our manuscript:
+> Liu, M. B., Tang, H., Yang, J., Du, X., Gómez-Bombarelli, R., & Yildiz, B. "Predicting Surface Atomic Structures on Doped Perovskite Oxides Using Grand Canonical Monte Carlo: Model System of La0.6Sr0.4FeO3-δ" (Pending Publication).
