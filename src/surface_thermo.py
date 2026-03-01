@@ -6,7 +6,6 @@ import yaml
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.ticker as mtick
 from pathlib import Path
 from pymatgen.core import Structure
 
@@ -35,15 +34,17 @@ def main(config_path, data_dir):
     mu_ref = config['thermodynamics']['m3gnet_o_ref']
     P_min, P_max = config['thermodynamics']['surface_pressure_range']
     elements = config['system']['elements']
-    stoich = config['system']['target_stoichiometry'] # Dynamically loads [16, 27, 81, 11]
-    tot_cation = sum(stoich) - stoich[2] # Sum of cations (16+27+11 = 54)
+    stoich = config['system']['target_stoichiometry'] 
+    tot_cation = sum(stoich) - stoich[2] 
     EABO3 = config['bulk_references']['ABO3']
     
     kb = 8.617e-5; F = 96485.3; R = 8.314
 
-    # 2. Defect Polynomial Fitting (Retained from manuscript math)
-    pressure_data = np.log(10**np.array([0, -1.08, -2.01, -2.32, -2.67, -2.96, -3.28, -3.62, -3.99, -4.36, -4.78, -5.31, -6.03, -7.14]))
-    stoi_data = np.array([2.986, 2.966, 2.940, 2.927, 2.916, 2.904, 2.893, 2.882, 2.870, 2.859, 2.847, 2.836, 2.824, 2.813])
+    # 2. Defect Polynomial Fitting (Dynamically Loaded from Config)
+    defect_cfg = config['defect_chemistry']
+    
+    pressure_data = np.log(10**np.array(defect_cfg['pressure_data_log10']))
+    stoi_data = np.array(defect_cfg['stoi_data'])
     comp_ex = (3 - stoi_data) / 3 * 100
     
     energy_ls = 0.5 * (kb * T * pressure_data) + mu_ref
@@ -52,10 +53,9 @@ def main(config_path, data_dir):
     comp = np.arange(1/stoich[2], 8/stoich[2], 1/stoich[2]) * 100
     energy_ls_muO = p_muO(comp)
 
-    # Note: Explicit defect energies kept from your specific manuscript data fits
-    energy_ls_VLa = [-14.64, -14.44, -14.15, -13.62, -13.06, -12.38, -11.70]
-    energy_ls_VFe = [-10.90, -10.63, -10.33, -9.68, -9.33, -8.36, -8.13]
-    energy_ls_VSr = [-8.55, -8.53, -8.11, -7.76, -7.25, -6.91, -6.52]
+    energy_ls_VLa = defect_cfg['energy_ls_VLa']
+    energy_ls_VFe = defect_cfg['energy_ls_VFe']
+    energy_ls_VSr = defect_cfg['energy_ls_VSr']
 
     p_muO_muLa = np.poly1d(np.polyfit(energy_ls_muO, energy_ls_VLa, 1))
     p_muO_muFe = np.poly1d(np.polyfit(energy_ls_muO, energy_ls_VFe, 1))
@@ -75,13 +75,11 @@ def main(config_path, data_dir):
     fig, ax = plt.subplots()
     color_lst = ['#222222', '#E66D50', '#B0432B', '#7A1A06', '#F3A361', '#E7C66B', '#D9A520']
     
-    delta_Sr_delta_La = -0.0374909
+    delta_Sr_delta_La = defect_cfg['delta_Sr_delta_La']
     
-    # DYNAMIC STOICHIOMETRY APPLIED HERE
     mu_O_low = mu_O[mu_O <= energy_ls_muO[0]]
     mu_O_high = mu_O[mu_O >= energy_ls_muO[0]]
     
-    # EABO3 - (O*muO) - (Sr*muSr) - (Fe*muFe) - (La*muLa) / Total Cations
     delta1 = (EABO3 - stoich[2]*mu_O_low - stoich[3]*p_muO_muSr(mu_O_low) - stoich[1]*p_muO_muFe(mu_O_low) - stoich[0]*(p_muO_muLa(mu_O_low) - delta_Sr_delta_La)) / tot_cation
     delta2 = (EABO3 - stoich[2]*mu_O_high - stoich[3]*ref_VSr - stoich[1]*ref_VFe - stoich[0]*(ref_VLa - delta_Sr_delta_La)) / tot_cation
     delta2 = delta2 - (delta2[0] - delta1[-1])
@@ -89,7 +87,7 @@ def main(config_path, data_dir):
     # Plot formatting...
     ax.set_xlim(P_min, P_max)
     ax.set_ylim(-80, 20)
-    ax.set_xlabel(r'$\log(P_{\mathrm{O_{2}}})\;(\mathrm{atm})$', fontweight='bold')
+    ax.set_xlabel(r'$\log_{10}(P_{\mathrm{O_{2}}})\;(\mathrm{atm})$', fontweight='bold')
     ax.set_ylabel(r'$\mathrm{Grand\;potentials\;(eV)}$', fontweight='bold')
     
     ax2 = ax.twiny()
@@ -98,7 +96,9 @@ def main(config_path, data_dir):
     ax2.set_xlim(ita_min, ita_max)
     ax2.set_xlabel(r'$\eta\;(\mathrm{V})$', fontweight='bold')
 
-    filename = f'surface_thermo_{T}K_generalized.png'
+    # Save cleanly into the output directory
+    os.makedirs('output', exist_ok=True)
+    filename = f'output/surface_thermo_{T}K_generalized.png'
     fig.savefig(filename, bbox_inches='tight', dpi=600)
     print(f"Surface Phase diagram generated successfully: {filename}")
 
