@@ -90,6 +90,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate phase stability from chemical potential trajectories.")
     parser.add_argument('--config', type=str, default='config.yaml', help='Path to config file')
     # Point the default data argument directly to the new JSON file
-    parser.add_argument('--data', type=str, default='data/mu_trajectory.json', help='Path to JSON data file')
+    parser.add_argument('--input', type=str, default='examples/mu_trajectory.json', help='Path to JSON data file')
     args = parser.parse_args()
-    main(args.config, args.data)
+    main(args.config, args.input)

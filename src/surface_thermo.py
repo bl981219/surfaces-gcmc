@@ -6,6 +6,7 @@ import yaml
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mtick
 from pathlib import Path
 from pymatgen.core import Structure
 
@@ -21,87 +22,197 @@ def get_energy_and_atoms(folder_path, elements_order):
         structure = Structure.from_file(os.path.join(folder_path, 'CONTCAR'))
         comp = structure.composition.get_el_amt_dict()
         return energy, [int(comp.get(el, 0)) for el in elements_order]
-    except Exception as e:
-        print(f"Skipping {folder_path}: {e}")
+    except Exception:
         return None, None
 
 def main(config_path, data_dir):
     with open(config_path, 'r') as file:
         config = yaml.safe_load(file)
 
-    # 1. System Parameters Dynamically Loaded
     T = config['thermodynamics']['temperature']
     mu_ref = config['thermodynamics']['m3gnet_o_ref']
     P_min, P_max = config['thermodynamics']['surface_pressure_range']
+    
     elements = config['system']['elements']
     stoich_list = config['system']['target_stoichiometry']
-    stoich = dict(zip(elements, stoich_list)) # Creates {'La': 16, 'Fe': 27, 'O': 81, 'Sr': 11}
-    tot_cation = sum(stoich_list) - stoich['O']
-    EABO3 = config['bulk_references']['ABO3']
+    stoich = dict(zip(elements, stoich_list))
     
-    kb = 8.617e-5; F = 96485.3; R = 8.314
-
-    # 2. Defect Polynomial Fitting (Dynamically Loaded from Config)
-    defect_cfg = config['defect_chemistry']
+    oxygen_el = 'O'
+    cations = [el for el in elements if el != oxygen_el]
     
-    pressure_data = np.log(10**np.array(defect_cfg['pressure_data_log10']))
-    stoi_data = np.array(defect_cfg['stoi_data'])
-    comp_ex = (3 - stoi_data) / 3 * 100
+    kb = 8.617333262145e-5; F = 96485.3329; R = 8.31446261815324
+    EABO3 = config['bulk_references']['ABO3']['energy']
     
+    vo_cfg = config['cation_vacancy_vs_VO']
+    vm_cfg = config['cation_vacancy_vs_VM']
+    mixing_offsets = vo_cfg.get('mixing_entropy_offsets', {})
+    
+    tot_cation_bulk = sum(stoich[c] for c in cations) 
+    tot_cation_slab = vm_cfg['tot_cation']
+    
+    # 1. Defect Polynomial Fitting (Oxygen Vacancy Dependent)
+    pressure_data = np.log(10**np.array(vo_cfg['pressure_data_log10']))
+    comp_ex = (3 - np.array(vo_cfg['stoi_data'])) / 3 * 100
     energy_ls = 0.5 * (kb * T * pressure_data) + mu_ref
     p_muO = np.poly1d(np.polyfit(comp_ex, energy_ls, 1))
     
-    comp = np.arange(1/stoich[2], 8/stoich[2], 1/stoich[2]) * 100
+    num_pts = len(vo_cfg[f'energy_ls_V{cations[0]}'])
+    comp = np.arange(1/stoich[oxygen_el], (num_pts+1)/stoich[oxygen_el], 1/stoich[oxygen_el]) * 100
     energy_ls_muO = p_muO(comp)
 
-    energy_ls_VLa = defect_cfg['energy_ls_VLa']
-    energy_ls_VFe = defect_cfg['energy_ls_VFe']
-    energy_ls_VSr = defect_cfg['energy_ls_VSr']
+    p_muO_mu = {}
+    ref_V = {}
+    for c in cations:
+        z = np.polyfit(energy_ls_muO, vo_cfg[f'energy_ls_V{c}'], 1)
+        p_muO_mu[c] = np.poly1d(z)
+        ref_V[c] = p_muO_mu[c](energy_ls_muO[0])
 
-    p_muO_muLa = np.poly1d(np.polyfit(energy_ls_muO, energy_ls_VLa, 1))
-    p_muO_muFe = np.poly1d(np.polyfit(energy_ls_muO, energy_ls_VFe, 1))
-    p_muO_muSr = np.poly1d(np.polyfit(energy_ls_muO, energy_ls_VSr, 1))
+    # 2. Defect Polynomial Fitting (Metal Vacancy Dependent)
+    comp_VM = vm_cfg['comp_VM']
+    p_VM = {}
+    for c in cations:
+        p = np.poly1d(np.polyfit(comp_VM, vm_cfg[f'energy_ls_V{c}'], 1))
+        p_VM[c] = p + (ref_V[c] - p(0)) 
 
-    ref_VSr, ref_VLa, ref_VFe = p_muO_muSr(energy_ls_muO[0]), p_muO_muLa(energy_ls_muO[0]), p_muO_muFe(energy_ls_muO[0])
-
-    mu_O = np.arange(mu_ref - 3.5, mu_ref + 3.5, 0.001)
-
-    # 3. Read Base Reference Structure
-    base_path = Path(data_dir)
-    energy_ref, atoms_ref = get_energy_and_atoms(base_path / 'ref', elements)
-    if energy_ref is None:
-        raise FileNotFoundError(f"Reference folder 'ref/' must exist in {data_dir} with OUTCAR and CONTCAR.")
-
-    # 4. Generalized Plotting Math
-    fig, ax = plt.subplots()
-    color_lst = ['#222222', '#E66D50', '#B0432B', '#7A1A06', '#F3A361', '#E7C66B', '#D9A520']
-    
-    delta_Sr_delta_La = defect_cfg['delta_Sr_delta_La']
-    
+    # 3. Chemical Potential Arrays
+    mu_O_ref = mu_ref
+    mu_O = np.arange(mu_O_ref - 3.5, mu_O_ref + 3.5, 0.001)
     mu_O_low = mu_O[mu_O <= energy_ls_muO[0]]
     mu_O_high = mu_O[mu_O >= energy_ls_muO[0]]
+
+    # 4. Bulk Calibration Constraints
+    sum_cations_low = sum(stoich[c] * (p_muO_mu[c](mu_O_low) + mixing_offsets.get(c, 0.0)) for c in cations)
+    sum_cations_high = sum(stoich[c] * (ref_V[c] + mixing_offsets.get(c, 0.0)) for c in cations)
     
-    delta1 = (EABO3 - stoich['O']*mu_O_low - stoich['Sr']*p_muO_muSr(mu_O_low) - stoich['Fe']*p_muO_muFe(mu_O_low) - stoich['La']*(p_muO_muLa(mu_O_low) - delta_Sr_delta_La)) / tot_cation
-    delta2 = (EABO3 - stoich['O']*mu_O_high - stoich['Sr']*ref_VSr - stoich['Fe']*ref_VFe - stoich['La']*(ref_VLa - delta_Sr_delta_La)) / tot_cation
+    delta1 = (EABO3 - stoich[oxygen_el] * mu_O_low - sum_cations_low) / tot_cation_bulk
+    delta2 = (EABO3 - stoich[oxygen_el] * mu_O_high - sum_cations_high) / tot_cation_bulk
     delta2 = delta2 - (delta2[0] - delta1[-1])
 
-    # Plot formatting...
-    ax.set_xlim(P_min, P_max)
+    p_c1 = {c: np.poly1d(np.polyfit(mu_O_low, p_muO_mu[c](mu_O_low), 1)) for c in cations}
+
+    ln_P_low = 2*(mu_O_low - mu_O_ref)/(kb*T)
+    log10_P_low = ln_P_low/np.log(10)
+    ln_P_high = 2*(mu_O_high - mu_O_ref)/(kb*T)
+    log10_P_high = ln_P_high/np.log(10)
+
+    # 5. Extract Reference Data
+    base_path = Path(data_dir)
+    energy_ref, atoms_ref_list = get_energy_and_atoms(base_path / 'ref', elements)
+    if energy_ref is None:
+        raise FileNotFoundError(f"Missing reference data in {base_path / 'ref'}")
+    atoms_ref = dict(zip(elements, atoms_ref_list))
+
+    # ==========================================================
+    # 6. PRE-SCAN: Count all valid structures to generate colors
+    # ==========================================================
+    plot_settings = config.get('plot_settings', {})
+    folders = plot_settings.get('folder_order', sorted(os.listdir(base_path)))
+    
+    valid_paths = []
+    for f_name in folders:
+        f_path = base_path / f_name
+        if not f_path.is_dir() or f_name == 'ref': 
+            continue
+        for t_name in sorted(os.listdir(f_path)):
+            path = f_path / t_name
+            if path.is_dir():
+                # Verify it has a valid energy before counting it
+                e, _ = get_energy_and_atoms(path, elements)
+                if e is not None:
+                    valid_paths.append((f_name, t_name, path))
+
+    # Mathematically slice the "turbo" colormap to give exactly the right number of distinct colors
+    total_lines = len(valid_paths) + 1 # +1 for the reference line
+    color_palette = plt.cm.turbo(np.linspace(0.05, 0.95, total_lines))
+    # ==========================================================
+
+    # Plot Setup
+    fig, ax = plt.subplots()
+    label_font = {'family':'sans-serif', 'weight': 'bold', 'size': 16}
+    
+    low_lst = [np.full_like(mu_O_low, 0)]
+    high_lst = [np.full_like(mu_O_high, 0)]
+    dynamic_color_lst = []
+    
+    # Plot Reference structure using the first color in our new dynamic palette
+    c_ref = color_palette[0]
+    ax.plot(log10_P_low, low_lst[0], label='Reference', color=c_ref)
+    ax.plot(log10_P_high, high_lst[0], color=c_ref)
+    dynamic_color_lst.append(c_ref)
+
+    # 7. Universal Directory Plotting
+    for idx, (f_name, t_name, path) in enumerate(valid_paths):
+        energy, atoms_list = get_energy_and_atoms(path, elements)
+        atoms = dict(zip(elements, atoms_list))
+        stoi_diff = {el: atoms[el] - atoms_ref[el] for el in elements}
+        
+        low = energy - energy_ref - stoi_diff[oxygen_el] * mu_O_low
+        high = energy - energy_ref - stoi_diff[oxygen_el] * mu_O_high
+        
+        for c in cations:
+            offset = mixing_offsets.get(c, 0.0)
+            term_low = p_c1[c](mu_O_low) + delta1 + offset + p_VM[c](stoi_diff[c]/tot_cation_slab*100) - ref_V[c]
+            low -= stoi_diff[c] * term_low
+            
+            term_high = ref_V[c] + delta2 + offset + p_VM[c](stoi_diff[c]/tot_cation_slab*100) - ref_V[c]
+            high -= stoi_diff[c] * term_high
+
+        label = f"{f_name} {t_name}"
+        
+        # Grab the exact, unique color pre-calculated for this specific phase
+        c_hex = color_palette[idx + 1]
+        
+        ax.plot(log10_P_low, low, label=label, color=c_hex)
+        ax.plot(log10_P_high, high, color=c_hex)
+        
+        low_lst.append(low)
+        high_lst.append(high)
+        dynamic_color_lst.append(c_hex)
+
+    # 8. Generate the Phase Envelope (Convex Hull) 
+    for i in range(len(mu_O_low)-1):
+        min_idx = np.argmin([ls[i] for ls in low_lst])
+        ax.fill_between(log10_P_low[i:i+2], min([ls[i] for ls in low_lst]), y2=-200, 
+                        facecolor=dynamic_color_lst[min_idx], alpha=1)
+                        
+    for i in range(len(mu_O_high)-1):
+        min_idx = np.argmin([ls[i] for ls in high_lst])
+        ax.fill_between(log10_P_high[i:i+2], min([ls[i] for ls in high_lst]), y2=-200, 
+                        facecolor=dynamic_color_lst[min_idx], alpha=1)
+    
+    min_idx_transition = np.argmin([ls[0] for ls in high_lst])
+    ax.fill_between([-2.5, 0.001], min([ls[0] for ls in high_lst]), y2=-200, 
+                    facecolor=dynamic_color_lst[min_idx_transition], alpha=1)
+
+    # 9. Render and Format
+    ax.axvline(x=np.log10(0.2), color='k', linestyle='--')
+    
+    ax.legend(frameon=True, loc="center left", bbox_to_anchor=(1.05, 0.5), handlelength=1.4, framealpha=0.92, fontsize="x-small")
+    
     ax.set_ylim(-80, 20)
-    ax.set_xlabel(r'$\log_{10}(P_{\mathrm{O_{2}}})\;(\mathrm{atm})$', fontweight='bold')
-    ax.set_ylabel(r'$\mathrm{Grand\;potentials\;(eV)}$', fontweight='bold')
+    ax.set_xlim(P_min, P_max)
+    ax.set_xlabel(r'$\log(P_{\mathrm{O_{2}}})\;(\mathrm{atm})$', fontdict=label_font)
+    ax.set_ylabel(r'$\mathrm{Grand\;potentials\;(eV)}$', fontdict=label_font)
+    
+    for spine in ax.spines.values(): spine.set_linewidth(2)
+    ax.set_xticklabels(ax.get_xticks(), fontweight='bold')
+    ax.xaxis.set_major_formatter(mtick.FormatStrFormatter('%.0f'))
+    ax.set_yticklabels(ax.get_yticks(), fontweight='bold')
+    ax.yaxis.set_major_formatter(mtick.FormatStrFormatter('%.0f'))
     
     ax2 = ax.twiny()
-    ita_min = (R * T / (4 * F)) * np.log(10**P_min / 0.2)
-    ita_max = (R * T / (4 * F)) * np.log(10**P_max / 0.2)
+    ita_min = (R*T/(4*F))*np.log(10**P_min/0.2)
+    ita_max = (R*T/(4*F))*np.log(10**P_max/0.2)
+    ax2.set_xticks(np.linspace(ita_min, ita_max, 9))
     ax2.set_xlim(ita_min, ita_max)
-    ax2.set_xlabel(r'$\eta\;(\mathrm{V})$', fontweight='bold')
+    ax2.set_xlabel(r'$\eta\;(\mathrm{V})$', fontdict=label_font)
+    ax2.set_xticklabels(ax2.get_xticks(), fontweight='bold')
+    ax2.xaxis.set_major_formatter(mtick.FormatStrFormatter('%.2f'))
 
-    # Save cleanly into the output directory
     os.makedirs('output', exist_ok=True)
-    filename = f'output/surface_thermo_{T}K_generalized.png'
+    filename = f'output/surface_thermo_{T}K.png'
     fig.savefig(filename, bbox_inches='tight', dpi=600)
-    print(f"Surface Phase diagram generated successfully: {filename}")
+    print(f"Surface phase diagram successfully generated: {filename}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

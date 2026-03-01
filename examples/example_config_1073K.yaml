@@ -26,7 +26,7 @@ thermodynamics:
   
 gcmc_settings:
   vasp_cmd: "mpirun -n 8 vasp_gam > vasp.out"
-  iterations: 1000
+  iterations: 10 # For testing purposes; increase to 1000+ for production runs
   mc_ratio: 0.5
   gcmc_ratio: 0.5
   
@@ -96,7 +96,7 @@ cation_vacancy_vs_VO:
   energy_ls_VSr: [-8.55, -8.53, -8.11, -7.76, -7.25, -6.91, -6.52]
   # Configurational entropy shifts due to fractional site occupancies (kb*T*ln(x/x_ref))
   mixing_entropy_offsets: 
-    La: 0.0374909 # A-site mixing: kb*T*ln(x_La / x_Sr) 0.03050 for 873K
+    La: 0.0374909 # A-site mixing: kb*T*ln(x_La / x_Sr). La: 0.03050 for 873K
 
 cation_vacancy_vs_VM:
   tot_cation: 125 
