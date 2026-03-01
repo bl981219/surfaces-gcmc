@@ -5,6 +5,7 @@ This repository contains a multi-scale computational pipeline designed to predic
 ## Core Features
 * **Accelerated GCMC Sampling:** Uses the M3GNet universal graph neural network to evaluate Monte Carlo structural moves (insertions, removals, exchanges, displacements) in-memory, bypassing expensive Density Functional Theory (DFT) steps for massive computational savings.
 * **Hybrid VASP Verification:** Automatically triggers VASP at user-defined intervals to ground the ML-IAP energies and ensure high-fidelity structural relaxation.
+* **Bulk Thermodynamics:** Calculates bulk decomposition phase diagrams and evaluates competing phases under specific environmental conditions to predict potential surface segregates.
 * **Universal Surface Thermodynamics:** Generates multi-phase convex hull surface stability diagrams as a function of temperature ($T$), oxygen partial pressure ($P_{O_2}$), and overpotential ($\eta$). The mathematical model explicitly incorporates bulk defect chemistry, configurational mixing entropy (for fractional A/B-site doping), and self-limiting segregation principles.
 
 ## Prerequisites
@@ -42,7 +43,14 @@ You will need to compute:
 Input these polynomial arrays into the `cation_vacancy_vs_VO` and `cation_vacancy_vs_VM` blocks of your `config.yaml`.
 
 ### Step 2: Identify Competing Phases
-Before running the surface sampling, you must evaluate the bulk stability against secondary phase precipitation. Run the bulk thermodynamics script to identify which phases compete with your parent material:
+Before running the surface sampling, you must evaluate the bulk stability against secondary phase precipitation. 
+
+First, calculate the bulk decomposition phase diagram:
+```bash
+python src/bulk_thermo.py --config config.yaml
+```
+
+Next, run the identifier script to find the specific phases that compete with your parent material under operational conditions:
 ```bash
 python src/competing_phases_identifier.py --config config.yaml
 ```
@@ -75,8 +83,6 @@ python src/surface_thermo.py --config config.yaml --data_dir path/to/your/cluste
 ```
 This script will automatically crawl your directory, apply the bulk defect calibrations and mixing entropies, and output a unified `.png` phase diagram mapping the lowest-energy surfaces.
 
-## Authors & Citation
-**Mengren Bill Liu, Hao Tang, Jing Yang, Xiaochen Du, Rafael Gómez-Bombarelli, and Bilge Yildiz**
-
+## Citation
 If you use this code in your research, please cite our manuscript:
 > Liu, M. B., Tang, H., Yang, J., Du, X., Gómez-Bombarelli, R., & Yildiz, B. "Predicting Surface Atomic Structures on Doped Perovskite Oxides Using Grand Canonical Monte Carlo: Model System of La<sub>0.6</sub>Sr<sub>0.4</sub>FeO<sub>3-δ</sub>" (Pending Publication).
