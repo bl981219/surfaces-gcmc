@@ -25,9 +25,14 @@ def get_energy_and_atoms(folder_path, elements_order):
     except Exception:
         return None, None
 
-def main(config_path, data_dir):
-    with open(config_path, 'r') as file:
+def main():
+    parser = argparse.ArgumentParser(description="Generate Surface Phase Diagram")
+    parser.add_argument('--config', type=str, default='config.yaml')
+    parser.add_argument('--data_dir', type=str, default='.')
+    args = parser.parse_args()
+    with open(args.config, 'r') as file:
         config = yaml.safe_load(file)
+    data_dir = args.data_dir
 
     T = config['thermodynamics']['temperature']
     mu_ref = config['thermodynamics']['m3gnet_o_ref']
@@ -215,8 +220,4 @@ def main(config_path, data_dir):
     print(f"Surface phase diagram successfully generated: {filename}")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--config', type=str, default='config.yaml')
-    parser.add_argument('--data_dir', type=str, default='.')
-    args = parser.parse_args()
-    main(args.config, args.data_dir)
+    main()

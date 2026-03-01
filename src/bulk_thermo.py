@@ -30,8 +30,12 @@ def oxygen_chemical_potential(T, P, mu_0_o2):
 
     return 0.5 * (mu_0_o2 + mu_0 + mu_p)
 
-def main(config_path):
-    with open(config_path, 'r') as file:
+def main():
+    parser = argparse.ArgumentParser(description="Calculate Bulk Phase Diagram")
+    parser.add_argument('--config', type=str, default='config.yaml', help='Path to config file')
+    args = parser.parse_args()
+
+    with open(args.config, 'r') as file:
         config = yaml.safe_load(file)
 
     # 1. Load Parameters Dynamically
@@ -125,10 +129,11 @@ def main(config_path):
     # 5. Format and Save Axes
     for spine in ax.spines.values():
         spine.set_linewidth(2)
-    ax.set_xticklabels(ax.get_xticks(), fontweight='bold')
     ax.xaxis.set_major_formatter(mtick.FormatStrFormatter('%.0f'))
-    ax.set_yticklabels(ax.get_yticks(), fontweight='bold')
     ax.yaxis.set_major_formatter(mtick.FormatStrFormatter('%.0f'))
+    # Safely make the formatted tick labels bold
+    plt.setp(ax.get_xticklabels(), fontweight='bold')
+    plt.setp(ax.get_yticklabels(), fontweight='bold')
     ax.set_xlabel(r'$\mathrm{Temperature (K)}$', fontdict=label_font)
     ax.set_ylabel(r'$\log(P_{\mathrm{O_{2}}})\;(\mathrm{atm})$', fontdict=label_font)
 
@@ -138,10 +143,5 @@ def main(config_path):
     fig.savefig(save_path, bbox_inches='tight', dpi=150)
     print(f"\nPhase diagram saved to {save_path}")
 
-    
-
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Calculate Bulk Phase Diagram")
-    parser.add_argument('--config', type=str, default='config.yaml', help='Path to config file')
-    args = parser.parse_args()
-    main(args.config)
+    main()

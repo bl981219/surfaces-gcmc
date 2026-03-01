@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "surfaces-gcmc"
+version = "0.1.0"
+description = "Predicting Surface Atomic Structures on Doped Perovskite Oxides Using Grand Canonical Monte Carlo"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [
+  { name = "Mengren Bill Liu" },
+  { name = "Hao Tang" },
+  { name = "Jing Yang" },
+  { name = "Xiaochen Du" },
+  { name = "Rafael Gómez-Bombarelli" },
+  { name = "Bilge Yildiz" }
+]
+dependencies = [
+    "numpy",
+    "matplotlib",
+    "pyyaml",
+    "pymatgen",
+    "m3gnet",
+    "tensorflow"
+]
+
+[project.scripts]
+# This creates easy-to-use terminal commands for your users
+surfaces-gcmc-sampler = "src.gcmc_sampler:main"
+surfaces-gcmc-thermo = "src.surface_thermo:main"
+surfaces-bulk-thermo = "src.bulk_thermo:main"
+surfaces-competing-phases = "src.competing_phases_identifier:main"
+
+[tool.setuptools]
+packages = ["src"]

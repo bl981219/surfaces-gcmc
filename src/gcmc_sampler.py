@@ -332,9 +332,12 @@ class GCMCSampler:
                 writer.writerow([step, move, valid_move, m3g_accepted, vasp_status, f"{delta_e_val:.4f}", f"{current_m3g_energy:.4f}"])
                 f.flush()
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description="Run Hybrid M3GNet/DFT GCMC Sampler")
     parser.add_argument('--config', type=str, default='config.yaml')
     parser.add_argument('--input', type=str, default='POSCAR')
     args = parser.parse_args()
     GCMCSampler(args.config).execute_gcmc_loop(args.input)
+
+if __name__ == "__main__":
+    main()
