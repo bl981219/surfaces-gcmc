@@ -2,50 +2,51 @@
 # Master configuration for Surface GCMC and Thermodynamics
 
 system:
-  elements: ["La", "Fe", "O", "Sr", "Co"]
-  target_stoichiometry: [16, 27, 81, 11] # LSCF bulk stoichiometry
+  elements: ["La", "Fe", "O", "Sr"]
+  target_stoichiometry: [16, 27, 81, 11] # LSF bulk stoichiometry
   masses: 
     La: 138.9055
     Fe: 55.847
     O: 15.9994
     Sr: 87.62
-    Co: 58.9332
 
 thermodynamics:
-  temperature: 1073 # For surface_thermo and competing_phases_identifier
+  temperature: 1073
   temperature_range: [700, 1500]
-  bulk_pressure_range: [-30, 20] # log(P_O2) in atm for bulk phase diagram
-  surface_pressure_range: [-12, 12] # log(P_O2) in atm for surface phase diagram
-  o2_overbinding_correction: 1.186 # eV per O molecule at temperature for MLIAP
-  m3gnet_o_ref: -6.0897 # M3GNet reference energy for O atom at 1073K (use -5.8366 for 873K)
-  mu_0_o2: -5.23 # Experimental value for O2 binding energy
-  chemical_potentials: # Used for GCMC Metropolis acceptance (eV)
+  bulk_pressure_range: [-30, 20]
+  surface_pressure_range: [-12, 12]
+  o2_overbinding_correction: 1.186
+  m3gnet_o_ref: -6.0897
+  mu_0_o2: -5.23
+  chemical_potentials:
     La: -12.5173
     Fe: -7.9327
     O: -6.3026
     Sr: -6.6074
-    Co: -6.3909
   
 gcmc_settings:
   vasp_cmd: "mpirun -n 8 vasp_gam > vasp.out"
-  iterations: 5000
+  iterations: 1000
   mc_ratio: 0.5
   gcmc_ratio: 0.5
-  # Z-axis fractional bounds for allowed GCMC/MC moves
-  region_gcmc_z: [0.73, 1.0] 
-  region_mc_z: [0.23, 1.0]
-  # Move probabilities
+  
+  # Z-axis CARTESIAN bounds (in Angstroms) for allowed GCMC/MC moves
+  region_gcmc_z: [11.2, 15.2] 
+  region_mc_z: [3.5, 15.2]
+  
+  # Move probabilities (Will be auto-normalized to 1.0 by the script)
   displace_ratio: 0.05
-  change_ratio: 0.15
-  remove_ratio: 0.3
-  insert_ratio: 0.3
-  gcmc_species: ["O"] # The element(s) allowed to be inserted/removed
-  min_distance: 1.0   # Minimum allowed distance (Angstroms) between atoms during moves
-  iterations: 1000
-  # Hybrid Evaluation Settings
-  vasp_verification_freq: inf  # Set to 'inf' to never run VASP, or an integer like 100
+  exchange_ratio: 0.10 # Swaps positions of two existing atoms
+  change_ratio: 0.05   # Mutates an atom's identity to a different element
+  remove_ratio: 0.40
+  insert_ratio: 0.40
+  
+  gcmc_species: ["O"]                # Elements allowed to be inserted/removed
+  change_species: ["La", "Fe", "Sr"] # Elements allowed to mutate their identity
+  
+  min_distance: 1.0
+  vasp_verification_freq: inf
 
-# Bulk reference energies (eV/unit) for linear programming
 bulk_references:
   La2O3:
     energy: -41.833
@@ -86,3 +87,11 @@ bulk_references:
   ABO3:
     energy: -957.450012
     stoich: {La: 16, Fe: 27, O: 81, Sr: 11}
+
+defect_chemistry:
+  pressure_data_log10: [0, -1.08, -2.01, -2.32, -2.67, -2.96, -3.28, -3.62, -3.99, -4.36, -4.78, -5.31, -6.03, -7.14]
+  stoi_data: [2.986, 2.966, 2.940, 2.927, 2.916, 2.904, 2.893, 2.882, 2.870, 2.859, 2.847, 2.836, 2.824, 2.813]
+  energy_ls_VLa: [-14.64, -14.44, -14.15, -13.62, -13.06, -12.38, -11.70]
+  energy_ls_VFe: [-10.90, -10.63, -10.33, -9.68, -9.33, -8.36, -8.13]
+  energy_ls_VSr: [-8.55, -8.53, -8.11, -7.76, -7.25, -6.91, -6.52]
+  delta_Sr_delta_La: -0.0374909
