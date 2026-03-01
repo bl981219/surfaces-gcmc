@@ -41,7 +41,6 @@ class GCMCSampler:
         self.change_species = self.config['gcmc_settings'].get('change_species', self.config['system']['elements'])
         self.min_dist = self.config['gcmc_settings'].get('min_distance', 0.5)
         
-        # Cartesian Z Bounds
         self.z_gcmc_min, self.z_gcmc_max = self.config['gcmc_settings']['region_gcmc_z']
         self.z_mc_min, self.z_mc_max = self.config['gcmc_settings']['region_mc_z']
         
@@ -51,7 +50,6 @@ class GCMCSampler:
         
         self.iterations = self.config['gcmc_settings']['iterations']
         
-        # Load and mathematically normalize probabilities to ensure they sum to 1.0
         self.p_displace = self.config['gcmc_settings'].get('displace_ratio', 0.05)
         self.p_exchange = self.config['gcmc_settings'].get('exchange_ratio', 0.10)
         self.p_change = self.config['gcmc_settings'].get('change_ratio', 0.05)
@@ -67,7 +65,6 @@ class GCMCSampler:
 
         self.kb = 8.617333262145e-5
 
-        # Directory and File Paths
         self.work_dir = "output/working"
         self.traj_dir = "output/trajectory"
         self.poscar_path = os.path.join(self.work_dir, "POSCAR")
@@ -92,9 +89,9 @@ class GCMCSampler:
                             return float(line.split()[-1])
         return None
 
-    def write_poscar(self, structure):
+    def write_poscar(self, structure, path):
         selective_dynamics = [[self.z_mc_min <= site.coords[2] <= self.z_mc_max]*3 for site in structure]
-        Poscar(structure, selective_dynamics=selective_dynamics).write_file(self.poscar_path)
+        Poscar(structure, selective_dynamics=selective_dynamics).write_file(path)
 
     def get_active_indices(self, structure, z_min, z_max, species=None):
         indices = []
@@ -131,7 +128,8 @@ class GCMCSampler:
                 
                 for _ in range(10): 
                     frac_x, frac_y = random.random(), random.random()
-                    cart_coords = structure.lattice.get_cartesian_coords([frac_x, frac_y, 0])
+                    # FIXED: Using new_struct lattice to prevent issues with changing cell parameters later
+                    cart_coords = new_struct.lattice.get_cartesian_coords([frac_x, frac_y, 0])
                     cart_coords[2] = random.uniform(self.z_mc_min, self.z_mc_max)
                     
                     new_struct.replace(idx, species, coords=cart_coords, coords_are_cartesian=True)
@@ -188,7 +186,7 @@ class GCMCSampler:
             insert_el = random.choice(self.gcmc_species)
             for _ in range(20):
                 frac_x, frac_y = random.random(), random.random()
-                cart_coords = structure.lattice.get_cartesian_coords([frac_x, frac_y, 0])
+                cart_coords = new_struct.lattice.get_cartesian_coords([frac_x, frac_y, 0])
                 cart_coords[2] = random.uniform(self.z_gcmc_min, self.z_gcmc_max)
                 
                 new_struct.insert(0, insert_el, cart_coords, coords_are_cartesian=True)
@@ -205,27 +203,35 @@ class GCMCSampler:
                     
         return new_struct, delta_N, valid_move, action_details
 
-    def run_m3gnet(self):
+    def run_m3gnet(self, structure):
+        """In-Memory Evaluation: passes structure directly to the ML model bypassing the disk."""
         if not self.relaxer:
             raise RuntimeError("M3GNet relaxer is not loaded.")
-        structure_poscar = Poscar.from_file(self.poscar_path).structure
-        relax_results = self.relaxer.relax(structure_poscar, verbose=False, steps=4000)
-        
+            
+        relax_results = self.relaxer.relax(structure, verbose=False, steps=4000)
         final_structure = relax_results['final_structure']
-        Poscar(final_structure).write_file(self.contcar_path)
-        
         final_energy = float(relax_results['trajectory'].energies[-1])
-        with open(self.outcar_path, "w") as output_file:
-            output_file.write(f'  energy  without entropy=    {final_energy}\n')
-        return final_energy
+        
+        # If we don't do this, copy.deepcopy() will crash trying to copy the neural network!
+        clean_struct = Structure(
+            lattice=final_structure.lattice,
+            species=final_structure.species,
+            coords=final_structure.frac_coords,
+            coords_are_cartesian=False
+        )
+        
+        return final_energy, clean_struct
 
-    def evaluate_energy(self, step):
+    def evaluate_energy(self, step, structure):
+        """Routes between VASP (Disk I/O) and M3GNet (In-Memory)."""
         if self.vasp_freq != float('inf') and step > 0 and step % self.vasp_freq == 0:
             print(f"[{step}] Executing VASP Verification...")
+            self.write_poscar(structure, self.poscar_path)
             os.system(f"cd {self.work_dir} && {self.vasp_cmd}")
+            return self.read_energy(), Structure.from_file(self.contcar_path)
         else:
             print(f"[{step}] Executing M3GNet Evaluation...")
-            self.run_m3gnet()
+            return self.run_m3gnet(structure)
 
     def execute_gcmc_loop(self, initial_poscar="POSCAR"):
         os.makedirs(self.work_dir, exist_ok=True)
@@ -236,20 +242,21 @@ class GCMCSampler:
             writer.writerow(['Step', 'Move_Type', 'Valid_Move', 'Accepted', 'Delta_E', 'Current_Energy'])
 
         structure = Structure.from_file(initial_poscar)
-        self.write_poscar(structure)
         
-        self.evaluate_energy(step=0)
-        current_energy = self.read_energy()
-        structure = Structure.from_file(self.contcar_path)
+        # Establish baseline energy
+        current_energy, structure = self.evaluate_energy(step=0, structure=structure)
         print(f"Initial Energy: {current_energy} eV\n")
         
+        # Archive initial baseline
         step0_dir = os.path.join(self.traj_dir, "step_0")
         os.makedirs(step0_dir, exist_ok=True)
-        shutil.copy(self.contcar_path, os.path.join(step0_dir, "CONTCAR"))
-        shutil.copy(self.outcar_path, os.path.join(step0_dir, "OUTCAR"))
+        self.write_poscar(structure, os.path.join(step0_dir, "CONTCAR"))
+        with open(os.path.join(step0_dir, "OUTCAR"), "w") as f:
+            f.write(f'  energy  without entropy=    {current_energy}\n')
         with open(os.path.join(step0_dir, "action.txt"), "w") as f:
             f.write(f"Initial geometry relaxation.\nBase Energy: {current_energy} eV\n")
 
+        # Main Monte Carlo Loop
         for step in range(1, self.iterations + 1):
             r = random.random()
             if r < self.p_displace: 
@@ -274,9 +281,8 @@ class GCMCSampler:
                 print(f"Invalid/Impossible move. Skipped evaluation. (Reason: {action_details})\n")
             else:
                 print(f"Proposed Action: {action_details}")
-                self.write_poscar(new_struct)
-                self.evaluate_energy(step)
-                new_energy_eval = self.read_energy()
+                
+                new_energy_eval, relaxed_struct = self.evaluate_energy(step, new_struct)
                 
                 if new_energy_eval is not None:
                     delta_e_val = new_energy_eval - current_energy
@@ -292,19 +298,20 @@ class GCMCSampler:
             if accepted:
                 print(f"Accepted! dE: {delta_e_val:.3f} eV\n")
                 current_energy = new_energy
-                structure = Structure.from_file(self.contcar_path)
+                structure = relaxed_struct # Update active state to the relaxed geometry
                 
                 step_dir = os.path.join(self.traj_dir, f"step_{step}")
                 os.makedirs(step_dir, exist_ok=True)
-                shutil.copy(self.contcar_path, os.path.join(step_dir, "CONTCAR"))
-                shutil.copy(self.outcar_path, os.path.join(step_dir, "OUTCAR"))
                 
+                # Write accepted output to disk
+                self.write_poscar(structure, os.path.join(step_dir, "CONTCAR"))
+                with open(os.path.join(step_dir, "OUTCAR"), "w") as f:
+                    f.write(f'  energy  without entropy=    {current_energy}\n')
                 with open(os.path.join(step_dir, "action.txt"), "w") as f:
                     f.write(action_details + f"\nDelta E: {delta_e_val:.4f} eV\nNew Energy: {new_energy:.4f} eV\n")
             else:
                 if valid_move:
                     print("Rejected.\n")
-                self.write_poscar(structure)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run GCMC Surface Sampler")
