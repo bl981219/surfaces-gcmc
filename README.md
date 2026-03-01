@@ -1,6 +1,6 @@
 # Surfaces-GCMC: Predicting Surface Atomic Structures on Doped Perovskite Oxides
 
-This repository contains a multi-scale computational pipeline designed to predict surface reconstructions, terminations, and phase precipitates on complex doped perovskite oxides (e.g., La0.6Sr0.4FeO3-δ). It integrates Grand Canonical Monte Carlo (GCMC) sampling, Machine Learning Interatomic Potentials (ML-IAPs), and rigorous bulk-to-surface defect thermodynamics to generate highly accurate surface phase diagrams.
+This repository contains a multi-scale computational pipeline designed to predict surface reconstructions, terminations, and phase precipitates on complex doped perovskite oxides (e.g., La<sub>0.6</sub>Sr<sub>0.4</sub>FeO<sub>3-δ</sub>). It integrates Grand Canonical Monte Carlo (GCMC) sampling, Machine Learning Interatomic Potentials (ML-IAPs), and rigorous bulk-to-surface defect thermodynamics to generate highly accurate surface phase diagrams.
 
 ## Core Features
 * **Accelerated GCMC Sampling:** Uses the M3GNet universal graph neural network to evaluate Monte Carlo structural moves (insertions, removals, exchanges, displacements) in-memory, bypassing expensive Density Functional Theory (DFT) steps for massive computational savings.
@@ -63,8 +63,6 @@ python src/surface_thermo.py --config config.yaml --data_dir path/to/your/cluste
 ```
 This script will automatically crawl your directory, apply the bulk defect calibrations and mixing entropies, and output a unified `.png` phase diagram mapping the lowest-energy surfaces.
 
-## Authors & Citation
-**Mengren Bill Liu, Hao Tang, Jing Yang, Xiaochen Du, Rafael Gómez-Bombarelli, and Bilge Yildiz**
-
+## Citation
 If you use this code in your research, please cite our manuscript:
-> Liu, M. B., Tang, H., Yang, J., Du, X., Gómez-Bombarelli, R., & Yildiz, B. "Predicting Surface Atomic Structures on Doped Perovskite Oxides Using Grand Canonical Monte Carlo: Model System of La0.6Sr0.4FeO3-δ" (Pending Publication).
+> Liu, M. B., Tang, H., Yang, J., Du, X., Gómez-Bombarelli, R., & Yildiz, B. "Predicting Surface Atomic Structures on Doped Perovskite Oxides Using Grand Canonical Monte Carlo: Model System of La<sub>0.6</sub>Sr<sub>0.4</sub>FeO<sub>3-δ</sub>" (Pending Publication).
