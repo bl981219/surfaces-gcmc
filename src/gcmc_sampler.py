@@ -38,8 +38,10 @@ class GCMCSampler:
         self.mu_dict = self.config['thermodynamics']['chemical_potentials']
         
         self.gcmc_species = self.config['gcmc_settings'].get('gcmc_species', ['O'])
+        self.change_species = self.config['gcmc_settings'].get('change_species', self.config['system']['elements'])
         self.min_dist = self.config['gcmc_settings'].get('min_distance', 0.5)
         
+        # Cartesian Z Bounds
         self.z_gcmc_min, self.z_gcmc_max = self.config['gcmc_settings']['region_gcmc_z']
         self.z_mc_min, self.z_mc_max = self.config['gcmc_settings']['region_mc_z']
         
@@ -49,9 +51,20 @@ class GCMCSampler:
         
         self.iterations = self.config['gcmc_settings']['iterations']
         
-        self.p_displace = self.config['gcmc_settings']['displace_ratio']
-        self.p_change = self.config['gcmc_settings']['change_ratio']
-        self.p_remove = self.config['gcmc_settings']['remove_ratio']
+        # Load and mathematically normalize probabilities to ensure they sum to 1.0
+        self.p_displace = self.config['gcmc_settings'].get('displace_ratio', 0.05)
+        self.p_exchange = self.config['gcmc_settings'].get('exchange_ratio', 0.10)
+        self.p_change = self.config['gcmc_settings'].get('change_ratio', 0.05)
+        self.p_remove = self.config['gcmc_settings'].get('remove_ratio', 0.40)
+        self.p_insert = self.config['gcmc_settings'].get('insert_ratio', 0.40)
+        
+        p_tot = self.p_displace + self.p_exchange + self.p_change + self.p_remove + self.p_insert
+        self.p_displace /= p_tot
+        self.p_exchange /= p_tot
+        self.p_change /= p_tot
+        self.p_remove /= p_tot
+        self.p_insert /= p_tot
+
         self.kb = 8.617333262145e-5
 
         # Directory and File Paths
@@ -107,62 +120,90 @@ class GCMCSampler:
             
         delta_N = {}
         valid_move = False
+        action_details = f"Failed to perform {move_type}"
         
         if move_type == 'displace':
             active_idx = self.get_active_indices(new_struct, self.z_mc_min, self.z_mc_max)
             if active_idx:
                 idx = random.choice(active_idx)
+                original_coords = new_struct[idx].coords
+                species = new_struct[idx].species_string
+                
                 for _ in range(10): 
-                    new_x = random.uniform(0, structure.lattice.a)
-                    new_y = random.uniform(0, structure.lattice.b)
-                    new_z = random.uniform(self.z_mc_min, self.z_mc_max)
+                    frac_x, frac_y = random.random(), random.random()
+                    cart_coords = structure.lattice.get_cartesian_coords([frac_x, frac_y, 0])
+                    cart_coords[2] = random.uniform(self.z_mc_min, self.z_mc_max)
                     
-                    new_struct.replace(idx, new_struct[idx].species, coords=[new_x, new_y, new_z], coords_are_cartesian=True)
+                    new_struct.replace(idx, species, coords=cart_coords, coords_are_cartesian=True)
                     
                     distances = new_struct.distance_matrix[idx]
                     distances[idx] = float('inf')
                     if np.min(distances) > self.min_dist:
                         valid_move = True
+                        action_details = f"DISPLACE: Atom {idx} ({species}) moved from [{original_coords[0]:.3f}, {original_coords[1]:.3f}, {original_coords[2]:.3f}] to [{cart_coords[0]:.3f}, {cart_coords[1]:.3f}, {cart_coords[2]:.3f}]"
                         break
+                
+                if not valid_move:
+                    new_struct.replace(idx, species, coords=original_coords, coords_are_cartesian=True)
 
-        elif move_type == 'change':
+        elif move_type == 'exchange':
             active_idx = self.get_active_indices(new_struct, self.z_mc_min, self.z_mc_max)
             if len(active_idx) >= 2:
                 idx1, idx2 = random.sample(active_idx, 2)
-                sp1, sp2 = new_struct[idx1].species, new_struct[idx2].species
+                sp1, sp2 = new_struct[idx1].species_string, new_struct[idx2].species_string
                 if sp1 != sp2:
                     new_struct.replace(idx1, sp2)
                     new_struct.replace(idx2, sp1)
                     valid_move = True
+                    action_details = f"EXCHANGE: Swapped Atom {idx1} (was {sp1}, now {sp2}) with Atom {idx2} (was {sp2}, now {sp1})"
+
+        elif move_type == 'change':
+            active_idx = self.get_active_indices(new_struct, self.z_mc_min, self.z_mc_max, self.change_species)
+            if active_idx:
+                idx = random.choice(active_idx)
+                old_species = new_struct[idx].species_string
+                possible_new_species = [el for el in self.change_species if el != old_species]
+                
+                if possible_new_species:
+                    new_species = random.choice(possible_new_species)
+                    new_struct.replace(idx, new_species)
+                    
+                    delta_N[old_species] = -1
+                    delta_N[new_species] = 1
+                    valid_move = True
+                    action_details = f"CHANGE: Mutated Atom {idx} from {old_species} to {new_species}"
 
         elif move_type == 'remove':
             active_idx = self.get_active_indices(new_struct, self.z_gcmc_min, self.z_gcmc_max, self.gcmc_species)
             if active_idx:
                 idx = random.choice(active_idx)
                 el = new_struct[idx].species_string
+                orig_coords = new_struct[idx].coords
                 new_struct.remove_sites([idx])
                 delta_N[el] = -1
                 valid_move = True
+                action_details = f"REMOVE: Deleted Atom {idx} ({el}) at [{orig_coords[0]:.3f}, {orig_coords[1]:.3f}, {orig_coords[2]:.3f}]"
 
         elif move_type == 'insert':
             insert_el = random.choice(self.gcmc_species)
             for _ in range(20):
-                new_x = random.uniform(0, structure.lattice.a)
-                new_y = random.uniform(0, structure.lattice.b)
-                new_z = random.uniform(self.z_gcmc_min, self.z_gcmc_max)
+                frac_x, frac_y = random.random(), random.random()
+                cart_coords = structure.lattice.get_cartesian_coords([frac_x, frac_y, 0])
+                cart_coords[2] = random.uniform(self.z_gcmc_min, self.z_gcmc_max)
                 
-                new_struct.insert(0, insert_el, [new_x, new_y, new_z], coords_are_cartesian=True)
+                new_struct.insert(0, insert_el, cart_coords, coords_are_cartesian=True)
                 
                 distances = new_struct.distance_matrix[0]
                 distances[0] = float('inf')
                 if np.min(distances) > self.min_dist:
                     delta_N[insert_el] = 1
                     valid_move = True
+                    action_details = f"INSERT: Added Atom ({insert_el}) at [{cart_coords[0]:.3f}, {cart_coords[1]:.3f}, {cart_coords[2]:.3f}]"
                     break
                 else:
                     new_struct.remove_sites([0]) 
                     
-        return new_struct, delta_N, valid_move
+        return new_struct, delta_N, valid_move, action_details
 
     def run_m3gnet(self):
         if not self.relaxer:
@@ -181,14 +222,12 @@ class GCMCSampler:
     def evaluate_energy(self, step):
         if self.vasp_freq != float('inf') and step > 0 and step % self.vasp_freq == 0:
             print(f"[{step}] Executing VASP Verification...")
-            # Navigate into the working directory, run VASP, then navigate back
             os.system(f"cd {self.work_dir} && {self.vasp_cmd}")
         else:
             print(f"[{step}] Executing M3GNet Evaluation...")
             self.run_m3gnet()
 
     def execute_gcmc_loop(self, initial_poscar="POSCAR"):
-        # Setup directories
         os.makedirs(self.work_dir, exist_ok=True)
         os.makedirs(self.traj_dir, exist_ok=True)
         
@@ -204,25 +243,37 @@ class GCMCSampler:
         structure = Structure.from_file(self.contcar_path)
         print(f"Initial Energy: {current_energy} eV\n")
         
-        shutil.copy(self.contcar_path, os.path.join(self.traj_dir, "step_0_CONTCAR"))
+        step0_dir = os.path.join(self.traj_dir, "step_0")
+        os.makedirs(step0_dir, exist_ok=True)
+        shutil.copy(self.contcar_path, os.path.join(step0_dir, "CONTCAR"))
+        shutil.copy(self.outcar_path, os.path.join(step0_dir, "OUTCAR"))
+        with open(os.path.join(step0_dir, "action.txt"), "w") as f:
+            f.write(f"Initial geometry relaxation.\nBase Energy: {current_energy} eV\n")
 
         for step in range(1, self.iterations + 1):
             r = random.random()
-            if r < self.p_displace: move = 'displace'
-            elif r < self.p_displace + self.p_change: move = 'change'
-            elif r < self.p_displace + self.p_change + self.p_remove: move = 'remove'
-            else: move = 'insert'
+            if r < self.p_displace: 
+                move = 'displace'
+            elif r < self.p_displace + self.p_exchange: 
+                move = 'exchange'
+            elif r < self.p_displace + self.p_exchange + self.p_change: 
+                move = 'change'
+            elif r < self.p_displace + self.p_exchange + self.p_change + self.p_remove: 
+                move = 'remove'
+            else: 
+                move = 'insert'
             
             print(f"--- Step {step}/{self.iterations} | Move: {move.upper()} ---")
-            new_struct, delta_N, valid_move = self.attempt_move(structure, move)
+            new_struct, delta_N, valid_move, action_details = self.attempt_move(structure, move)
             
             accepted = False
             delta_e_val = 0.0
             new_energy = current_energy
             
             if not valid_move:
-                print("Invalid/Impossible move. Skipped evaluation.\n")
+                print(f"Invalid/Impossible move. Skipped evaluation. (Reason: {action_details})\n")
             else:
+                print(f"Proposed Action: {action_details}")
                 self.write_poscar(new_struct)
                 self.evaluate_energy(step)
                 new_energy_eval = self.read_energy()
@@ -242,7 +293,14 @@ class GCMCSampler:
                 print(f"Accepted! dE: {delta_e_val:.3f} eV\n")
                 current_energy = new_energy
                 structure = Structure.from_file(self.contcar_path)
-                shutil.copy(self.contcar_path, os.path.join(self.traj_dir, f"step_{step}_CONTCAR"))
+                
+                step_dir = os.path.join(self.traj_dir, f"step_{step}")
+                os.makedirs(step_dir, exist_ok=True)
+                shutil.copy(self.contcar_path, os.path.join(step_dir, "CONTCAR"))
+                shutil.copy(self.outcar_path, os.path.join(step_dir, "OUTCAR"))
+                
+                with open(os.path.join(step_dir, "action.txt"), "w") as f:
+                    f.write(action_details + f"\nDelta E: {delta_e_val:.4f} eV\nNew Energy: {new_energy:.4f} eV\n")
             else:
                 if valid_move:
                     print("Rejected.\n")
