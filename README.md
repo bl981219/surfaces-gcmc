@@ -17,12 +17,17 @@ This repository contains a multi-scale computational pipeline designed to predic
 ```text
 surfaces-gcmc/
 ├── src/
-│   ├── gcmc_sampler.py        # ML-accelerated Monte Carlo sampling engine
-│   └── surface_thermo.py      # Thermodynamic convex hull phase diagram generator
+│   ├── bulk_thermo.py                 # Computes bulk phase diagrams
+│   ├── competing_phases_identifier.py # Identifies competing phases for surface segregation
+│   ├── gcmc_sampler.py                # ML-accelerated Monte Carlo sampling engine
+│   └── surface_thermo.py              # Thermodynamic convex hull phase diagram generator
 ├── examples/
-│   ├── example_config.yaml    # Template configuration file for testing
-│   └── test_POSCAR            # Sample starting slab
-├── config.yaml                # Master configuration file for production runs
+│   ├── example_config.yaml            # Template configuration file for testing
+│   ├── test_POSCAR                    # Sample starting slab
+│   └── vasp_data/                     # Example directory of relaxed VASP output data
+├── config.yaml                        # Master configuration file for production runs
+├── reproduce_figures.sh               # Script to reproduce manuscript figures
+├── requirements.txt                   # Python environment dependencies
 └── README.md
 ```
 
@@ -36,12 +41,19 @@ You will need to compute:
 
 Input these polynomial arrays into the `cation_vacancy_vs_VO` and `cation_vacancy_vs_VM` blocks of your `config.yaml`.
 
-### Step 2: Configure the GCMC Sampler
-1. Provide an initial symmetric slab and save it as `POSCAR` in your working directory.
+### Step 2: Identify Competing Phases
+Before running the surface sampling, you must evaluate the bulk stability against secondary phase precipitation. Run the bulk thermodynamics script to identify which phases compete with your parent material:
+```bash
+python src/competing_phases_identifier.py --config config.yaml
+```
+The identified competing phases (e.g., SrO, SrO<sub>2</sub>, Ruddlesden-Popper phases, or elemental metals) serve as the rational basis for seeding your initial surface structures in the next step.
+
+### Step 3: Configure the GCMC Sampler
+1. Construct an initial symmetric slab guided by the competing phases identified in Step 2, and save it as `POSCAR` in your working directory.
 2. Ensure you have your VASP `INCAR`, `KPOINTS`, and `POTCAR` files in the same directory if you plan to use the hybrid VASP verification feature.
 3. Edit `config.yaml` to define your strict Cartesian Z-boundaries for Monte Carlo moves (`region_mc_z`) and Grand Canonical insertions/removals (`region_gcmc_z`). 
 
-### Step 3: Run the Sampler (HPC / Slurm Deployment)
+### Step 4: Run the Sampler (HPC / Slurm Deployment)
 Because GCMC requires thousands of evaluations, running this on a High-Performance Computing (HPC) cluster via a workload manager like Slurm is highly recommended. 
 
 ```bash
@@ -50,12 +62,12 @@ python src/gcmc_sampler.py --config config.yaml --input POSCAR
 ```
 *The sampler will output accepted geometries iteratively into the `output/trajectory/` directory.*
 
-### Step 4: Extract Unique Phases
-Analyze the generated `CONTCAR` files in the `output/trajectory/` folder. Cluster these geometries to identify the unique surface phases (e.g., Ruddlesden-Popper formations, SrO terminations, binary oxide precipitates). 
+### Step 5: Extract Unique Phases
+Analyze the generated `CONTCAR` files in the `output/trajectory/` folder. Cluster these geometries to identify the unique surface phases. 
 
 Perform a final, tight VASP relaxation on these unique structures and place their `CONTCAR` and `OUTCAR` files into subdirectories within a target data folder (e.g., `data_dir/SrO2/1/`, `data_dir/RP_GCMC/1/`). Ensure you also include a `data_dir/ref/` folder containing your ideal, un-reconstructed reference slab.
 
-### Step 5: Generate the Phase Diagram
+### Step 6: Generate the Surface Phase Diagram
 Once your unique phases are organized, execute the thermodynamics script to generate the convex hull:
 
 ```bash
@@ -63,6 +75,8 @@ python src/surface_thermo.py --config config.yaml --data_dir path/to/your/cluste
 ```
 This script will automatically crawl your directory, apply the bulk defect calibrations and mixing entropies, and output a unified `.png` phase diagram mapping the lowest-energy surfaces.
 
-## Citation
+## Authors & Citation
+**Mengren Bill Liu, Hao Tang, Jing Yang, Xiaochen Du, Rafael Gómez-Bombarelli, and Bilge Yildiz**
+
 If you use this code in your research, please cite our manuscript:
 > Liu, M. B., Tang, H., Yang, J., Du, X., Gómez-Bombarelli, R., & Yildiz, B. "Predicting Surface Atomic Structures on Doped Perovskite Oxides Using Grand Canonical Monte Carlo: Model System of La<sub>0.6</sub>Sr<sub>0.4</sub>FeO<sub>3-δ</sub>" (Pending Publication).
