@@ -34,8 +34,9 @@ def main(config_path, data_dir):
     mu_ref = config['thermodynamics']['m3gnet_o_ref']
     P_min, P_max = config['thermodynamics']['surface_pressure_range']
     elements = config['system']['elements']
-    stoich = config['system']['target_stoichiometry'] 
-    tot_cation = sum(stoich) - stoich[2] 
+    stoich_list = config['system']['target_stoichiometry']
+    stoich = dict(zip(elements, stoich_list)) # Creates {'La': 16, 'Fe': 27, 'O': 81, 'Sr': 11}
+    tot_cation = sum(stoich_list) - stoich['O']
     EABO3 = config['bulk_references']['ABO3']
     
     kb = 8.617e-5; F = 96485.3; R = 8.314
@@ -80,8 +81,8 @@ def main(config_path, data_dir):
     mu_O_low = mu_O[mu_O <= energy_ls_muO[0]]
     mu_O_high = mu_O[mu_O >= energy_ls_muO[0]]
     
-    delta1 = (EABO3 - stoich[2]*mu_O_low - stoich[3]*p_muO_muSr(mu_O_low) - stoich[1]*p_muO_muFe(mu_O_low) - stoich[0]*(p_muO_muLa(mu_O_low) - delta_Sr_delta_La)) / tot_cation
-    delta2 = (EABO3 - stoich[2]*mu_O_high - stoich[3]*ref_VSr - stoich[1]*ref_VFe - stoich[0]*(ref_VLa - delta_Sr_delta_La)) / tot_cation
+    delta1 = (EABO3 - stoich['O']*mu_O_low - stoich['Sr']*p_muO_muSr(mu_O_low) - stoich['Fe']*p_muO_muFe(mu_O_low) - stoich['La']*(p_muO_muLa(mu_O_low) - delta_Sr_delta_La)) / tot_cation
+    delta2 = (EABO3 - stoich['O']*mu_O_high - stoich['Sr']*ref_VSr - stoich['Fe']*ref_VFe - stoich['La']*(ref_VLa - delta_Sr_delta_La)) / tot_cation
     delta2 = delta2 - (delta2[0] - delta1[-1])
 
     # Plot formatting...
