@@ -16,9 +16,9 @@ This repository contains a multi-scale computational pipeline designed to predic
 Clone the repository and install the package using `pip`. This will automatically install all required dependencies (`pymatgen`, `m3gnet`, `numpy`, etc.) and register the executable commands to your system.
 
 ```bash
-git clone [https://github.com/bl981219/surfaces-gcmc.git](https://github.com/bl981219/surfaces-gcmc.git)
+git clone https://github.com/bl981219/surfaces-gcmc.git
 cd surfaces-gcmc
-pip install -e .
+pip install .
 ```
 
 ## Quick Start (Reproducing Manuscript Figures)
