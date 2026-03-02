@@ -22,10 +22,10 @@ dependencies = [
 
 [project.scripts]
 # This creates easy-to-use terminal commands for your users
-surfaces-gcmc-sampler = "surfaces_gcmc.sampler:main"
+surfaces-gcmc-sampler = "surfaces_gcmc.gcmc_sampler:main"
 surfaces-surface-thermo = "surfaces_gcmc.surface_thermo:main"
 surfaces-bulk-thermo = "surfaces_gcmc.bulk_thermo:main"
-surfaces-competing-phases = "surfaces_gcmc.competing_phases:main"
+surfaces-competing-phases = "surfaces_gcmc.competing_phases_identifier:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
