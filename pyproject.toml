@@ -15,7 +15,7 @@ dependencies = [
     "numpy",
     "matplotlib",
     "pyyaml",
-    "pymatgen",
+    "pymatgen>=2023.1.20",
     "m3gnet",
     "tensorflow"
 ]

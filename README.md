@@ -9,16 +9,23 @@ This repository contains a multi-scale computational pipeline designed to predic
 * **Universal Surface Thermodynamics:** Generates multi-phase convex hull surface stability diagrams as a function of temperature ($T$), oxygen partial pressure ($P_{O_2}$), and overpotential ($\eta$). The mathematical model explicitly incorporates bulk defect chemistry, configurational mixing entropy (for fractional cation site doping), and self-limiting segregation principles.
 
 ## Prerequisites
-* **Python 3.9+**
+* **Python 3.9** (Recommended to maintain strict compatibility with the `m3gnet` backend and its TensorFlow dependencies).
 * **VASP 5/6:** A licensed, compiled VASP executable accessible via your system's MPI run command (required for hybrid DFT verification).
 
 ## Installation
-Clone the repository and install the package using `pip`. This will automatically install all required dependencies (`pymatgen`, `m3gnet`, `numpy`, etc.) and register the executable commands to your system.
+Because this pipeline integrates machine learning libraries and computational chemistry tools, we **highly recommend** installing it inside an isolated virtual environment (e.g., Conda) to avoid dependency conflicts.
 
 ```bash
+# 1. Create and activate a Conda environment
+conda create -n surfaces_gcmc python=3.9 -y
+conda activate surfaces_gcmc
+
+# 2. Clone the repository
 git clone https://github.com/bl981219/surfaces-gcmc.git
 cd surfaces-gcmc
-pip install .
+
+# 3. Install the package (Editable mode recommended for researchers)
+pip install -e .
 ```
 
 ## Quick Start (Reproducing Manuscript Figures)
