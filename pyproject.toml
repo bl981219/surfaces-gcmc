@@ -9,12 +9,7 @@ description = "Predicting Surface Atomic Structures on Doped Perovskite Oxides U
 readme = "README.md"
 requires-python = ">=3.9"
 authors = [
-  { name = "Mengren Bill Liu" },
-  { name = "Hao Tang" },
-  { name = "Jing Yang" },
-  { name = "Xiaochen Du" },
-  { name = "Rafael Gómez-Bombarelli" },
-  { name = "Bilge Yildiz" }
+  { name = "Mengren Bill Liu" }
 ]
 dependencies = [
     "numpy",
@@ -27,10 +22,10 @@ dependencies = [
 
 [project.scripts]
 # This creates easy-to-use terminal commands for your users
-surfaces-gcmc-sampler = "src.gcmc_sampler:main"
-surfaces-gcmc-thermo = "src.surface_thermo:main"
-surfaces-bulk-thermo = "src.bulk_thermo:main"
-surfaces-competing-phases = "src.competing_phases_identifier:main"
+surfaces-gcmc-sampler = "surfaces_gcmc.sampler:main"
+surfaces-surface-thermo = "surfaces_gcmc.surface_thermo:main"
+surfaces-bulk-thermo = "surfaces_gcmc.bulk_thermo:main"
+surfaces-competing-phases = "surfaces_gcmc.competing_phases:main"
 
-[tool.setuptools]
-packages = ["src"]
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -14,7 +14,7 @@ surfaces-gcmc-sampler --config examples/example_config_1073K.yaml --input exampl
 
 echo "Reproducing Surface Phase Diagram..."
 # (Assuming they downloaded the example VASP data into an 'examples' folder)
-surfaces-gcmc-thermo --config examples/example_config_1073K.yaml --data_dir ./examples/converged_structures/
-surfaces-gcmc-thermo --config examples/example_config_873K.yaml --data_dir ./examples/converged_structures/
+surfaces-surface-thermo --config examples/example_config_1073K.yaml --data_dir ./examples/converged_structures/
+surfaces-surface-thermo --config examples/example_config_873K.yaml --data_dir ./examples/converged_structures/
 
 echo "Done! Check the 'output/' directory for the generated PNG and TXT files."
