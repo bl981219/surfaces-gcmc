@@ -1,0 +1,416 @@
+log10(PO2): -26.3027 | eta: -1.3628
+  -> La2O3 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> La3Sr1Fe2O8 stable: True
+  -> Fe stable: True
+  -> FeO stable: True
+  -> LFO stable: True
+-------------------
+log10(PO2): -25.5230 | eta: -1.3213
+  -> La2O3 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> La3Sr1Fe2O8 stable: True
+  -> Fe stable: True
+  -> FeO stable: True
+  -> LFO stable: True
+-------------------
+log10(PO2): -24.7339 | eta: -1.2793
+  -> La2O3 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> La3Sr1Fe2O8 stable: True
+  -> Fe stable: True
+  -> FeO stable: True
+  -> LFO stable: True
+-------------------
+log10(PO2): -23.9448 | eta: -1.2373
+  -> La2O3 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> La3Sr1Fe2O8 stable: True
+  -> Fe stable: True
+  -> FeO stable: True
+  -> LFO stable: True
+-------------------
+log10(PO2): -23.1557 | eta: -1.1953
+  -> La2O3 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> La3Sr1Fe2O8 stable: True
+  -> Fe stable: True
+  -> FeO stable: True
+  -> LFO stable: True
+-------------------
+log10(PO2): -22.3667 | eta: -1.1533
+  -> La2O3 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> La3Sr1Fe2O8 stable: True
+  -> Fe stable: True
+  -> FeO stable: True
+  -> LFO stable: True
+-------------------
+log10(PO2): -21.5776 | eta: -1.1113
+  -> La2O3 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> La3Sr1Fe2O8 stable: True
+  -> Fe stable: True
+  -> FeO stable: True
+  -> LFO stable: True
+-------------------
+log10(PO2): -20.7885 | eta: -1.0693
+  -> La2O3 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> La3Sr1Fe2O8 stable: True
+  -> Fe stable: True
+  -> FeO stable: True
+  -> LFO stable: True
+-------------------
+log10(PO2): -20.0088 | eta: -1.0278
+  -> La2O3 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> La3Sr1Fe2O8 stable: True
+  -> Fe stable: True
+  -> FeO stable: True
+  -> LFO stable: True
+-------------------
+log10(PO2): -19.2197 | eta: -0.9858
+  -> La2O3 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> La3Sr1Fe2O8 stable: True
+  -> Fe stable: True
+  -> FeO stable: True
+  -> LFO stable: True
+-------------------
+log10(PO2): -18.4307 | eta: -0.9438
+  -> La2O3 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> La3Sr1Fe2O8 stable: True
+  -> Fe stable: True
+  -> FeO stable: True
+  -> LFO stable: True
+-------------------
+log10(PO2): -17.6416 | eta: -0.9018
+  -> La2O3 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> La3Sr1Fe2O8 stable: True
+  -> Fe stable: True
+  -> FeO stable: True
+  -> SrO stable: True
+  -> LFO stable: True
+-------------------
+log10(PO2): -16.8525 | eta: -0.8598
+  -> La2O3 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> La3Sr1Fe2O8 stable: True
+  -> Fe stable: True
+  -> FeO stable: True
+  -> SrO stable: True
+  -> LFO stable: True
+-------------------
+log10(PO2): -16.0634 | eta: -0.8178
+  -> La2O3 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> La3Sr1Fe2O8 stable: True
+  -> Fe stable: True
+  -> FeO stable: True
+  -> SrO stable: True
+  -> LFO stable: True
+-------------------
+log10(PO2): -15.2743 | eta: -0.7758
+  -> La2O3 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> La3Sr1Fe2O8 stable: True
+  -> Fe stable: True
+  -> FeO stable: True
+  -> SrO stable: True
+  -> LFO stable: True
+-------------------
+log10(PO2): -14.4946 | eta: -0.7343
+  -> La2O3 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> La3Sr1Fe2O8 stable: True
+  -> Fe stable: True
+  -> FeO stable: True
+  -> SrO stable: True
+  -> LFO stable: True
+-------------------
+log10(PO2): -13.7056 | eta: -0.6923
+  -> La2O3 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> La3Sr1Fe2O8 stable: True
+  -> Fe stable: True
+  -> FeO stable: True
+  -> SrO stable: True
+  -> LFO stable: True
+-------------------
+log10(PO2): -12.9165 | eta: -0.6503
+  -> La2O3 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> La3Sr1Fe2O8 stable: True
+  -> Fe stable: True
+  -> FeO stable: True
+  -> SrO stable: True
+  -> LFO stable: True
+-------------------
+log10(PO2): -12.1274 | eta: -0.6083
+  -> La2O3 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> La3Sr1Fe2O8 stable: True
+  -> Fe stable: True
+  -> FeO stable: True
+  -> SrO stable: True
+  -> LFO stable: True
+-------------------
+log10(PO2): -11.3383 | eta: -0.5663
+  -> La2O3 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> La3Sr1Fe2O8 stable: True
+  -> Fe stable: True
+  -> FeO stable: True
+  -> SrO stable: True
+  -> LFO stable: True
+-------------------
+log10(PO2): -10.5492 | eta: -0.5243
+  -> La2O3 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> La3Sr1Fe2O8 stable: True
+  -> Fe stable: True
+  -> SrO stable: True
+  -> LFO stable: True
+-------------------
+log10(PO2): -9.7602 | eta: -0.4823
+  -> La2O3 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> La3Sr1Fe2O8 stable: True
+  -> Fe stable: True
+  -> SrO stable: True
+-------------------
+log10(PO2): -8.9805 | eta: -0.4408
+  -> La2O3 stable: True
+  -> La0Sr4Fe2O8 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> La3Sr1Fe2O8 stable: True
+  -> Fe stable: True
+  -> SrO stable: True
+-------------------
+log10(PO2): -8.1914 | eta: -0.3988
+  -> La2O3 stable: True
+  -> La0Sr4Fe2O8 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> La3Sr1Fe2O8 stable: True
+  -> Fe stable: True
+  -> SrO stable: True
+-------------------
+log10(PO2): -7.4023 | eta: -0.3568
+  -> La2O3 stable: True
+  -> La0Sr4Fe2O8 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> La3Sr1Fe2O8 stable: True
+  -> Fe stable: True
+  -> SrO stable: True
+-------------------
+log10(PO2): -6.6132 | eta: -0.3148
+  -> La2O3 stable: True
+  -> La0Sr4Fe2O8 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> La3Sr1Fe2O8 stable: True
+  -> Fe stable: True
+  -> SrO stable: True
+-------------------
+log10(PO2): -5.8242 | eta: -0.2728
+  -> La2O3 stable: True
+  -> La0Sr4Fe2O8 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> La3Sr1Fe2O8 stable: True
+  -> Fe stable: True
+  -> SrO stable: True
+-------------------
+log10(PO2): -5.0351 | eta: -0.2308
+  -> La2O3 stable: True
+  -> La0Sr4Fe2O8 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> La3Sr1Fe2O8 stable: True
+  -> Fe stable: True
+  -> SrO stable: True
+-------------------
+log10(PO2): -4.2460 | eta: -0.1888
+  -> La2O3 stable: True
+  -> La0Sr4Fe2O8 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> La3Sr1Fe2O8 stable: True
+  -> Fe stable: True
+  -> SrO stable: True
+-------------------
+log10(PO2): -3.4663 | eta: -0.1473
+  -> La2O3 stable: True
+  -> La0Sr4Fe2O8 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> La3Sr1Fe2O8 stable: True
+  -> Fe stable: True
+  -> SrO stable: True
+-------------------
+log10(PO2): -2.6772 | eta: -0.1053
+  -> La2O3 stable: True
+  -> La0Sr4Fe2O8 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> Fe stable: True
+  -> SrO stable: True
+-------------------
+log10(PO2): -1.8882 | eta: -0.0633
+  -> La2O3 stable: True
+  -> La0Sr4Fe2O8 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> Fe stable: True
+  -> SrO stable: True
+-------------------
+log10(PO2): -1.0991 | eta: -0.0213
+  -> La2O3 stable: True
+  -> La0Sr4Fe2O8 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> Fe stable: True
+  -> SrO stable: True
+-------------------
+log10(PO2): -0.3100 | eta: 0.0207
+  -> La2O3 stable: True
+  -> La0Sr4Fe2O8 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> Fe stable: True
+  -> SrO stable: True
+-------------------
+log10(PO2): 0.4791 | eta: 0.0627
+  -> La2O3 stable: True
+  -> La0Sr4Fe2O8 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> Fe stable: True
+  -> SrO stable: True
+-------------------
+log10(PO2): 1.2682 | eta: 0.1047
+  -> La2O3 stable: True
+  -> La0Sr4Fe2O8 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> Fe stable: True
+  -> SrO stable: True
+-------------------
+log10(PO2): 2.0479 | eta: 0.1462
+  -> La2O3 stable: True
+  -> La0Sr4Fe2O8 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> Fe stable: True
+  -> SrO stable: True
+-------------------
+log10(PO2): 2.8369 | eta: 0.1882
+  -> La2O3 stable: True
+  -> La0Sr4Fe2O8 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> Fe stable: True
+  -> SrO stable: True
+-------------------
+log10(PO2): 3.6260 | eta: 0.2302
+  -> La2O3 stable: True
+  -> La0Sr4Fe2O8 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> SrO stable: True
+-------------------
+log10(PO2): 4.4151 | eta: 0.2722
+  -> La2O3 stable: True
+  -> La0Sr4Fe2O8 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> SrO stable: True
+-------------------
+log10(PO2): 5.2042 | eta: 0.3142
+  -> La2O3 stable: True
+  -> La0Sr4Fe2O8 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> SrO stable: True
+-------------------
+log10(PO2): 5.9932 | eta: 0.3562
+  -> La2O3 stable: True
+  -> La0Sr4Fe2O8 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> SrO stable: True
+-------------------
+log10(PO2): 6.7823 | eta: 0.3982
+  -> La2O3 stable: True
+  -> La0Sr4Fe2O8 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> SrO stable: True
+-------------------
+log10(PO2): 7.5620 | eta: 0.4397
+  -> La2O3 stable: True
+  -> La0Sr4Fe2O8 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+-------------------
+log10(PO2): 8.3511 | eta: 0.4817
+  -> La2O3 stable: True
+  -> La0Sr4Fe2O8 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+-------------------
+log10(PO2): 9.1402 | eta: 0.5237
+  -> La2O3 stable: True
+  -> La0Sr4Fe2O8 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> SrO2 stable: True
+-------------------
+log10(PO2): 9.9293 | eta: 0.5657
+  -> La2O3 stable: True
+  -> La0Sr4Fe2O8 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> La2Sr2Fe2O8 stable: True
+  -> SrO2 stable: True
+-------------------
+log10(PO2): 10.7183 | eta: 0.6077
+  -> La2O3 stable: True
+  -> La0Sr4Fe2O8 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> SrO2 stable: True
+-------------------
+log10(PO2): 11.5074 | eta: 0.6497
+  -> La2O3 stable: True
+  -> La0Sr4Fe2O8 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> SrO2 stable: True
+-------------------
+log10(PO2): 12.2965 | eta: 0.6917
+  -> La2O3 stable: True
+  -> La0Sr4Fe2O8 stable: True
+  -> La1Sr3Fe2O8 stable: True
+  -> SrO2 stable: True
+-------------------

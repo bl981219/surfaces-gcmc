@@ -186,7 +186,7 @@ def main():
                         facecolor=dynamic_color_lst[min_idx], alpha=1)
     
     min_idx_transition = np.argmin([ls[0] for ls in high_lst])
-    ax.fill_between([-2.5, 0.001], min([ls[0] for ls in high_lst]), y2=-200, 
+    ax.fill_between([log10_P_low[-1], log10_P_high[0]], min([ls[0] for ls in high_lst]), y2=-200, 
                     facecolor=dynamic_color_lst[min_idx_transition], alpha=1)
 
     # 9. Render and Format
@@ -200,10 +200,10 @@ def main():
     ax.set_ylabel(r'$\mathrm{Grand\;potentials\;(eV)}$', fontdict=label_font)
     
     for spine in ax.spines.values(): spine.set_linewidth(2)
-    ax.set_xticklabels(ax.get_xticks(), fontweight='bold')
     ax.xaxis.set_major_formatter(mtick.FormatStrFormatter('%.0f'))
-    ax.set_yticklabels(ax.get_yticks(), fontweight='bold')
     ax.yaxis.set_major_formatter(mtick.FormatStrFormatter('%.0f'))
+    plt.setp(ax.get_xticklabels(), fontweight='bold')
+    plt.setp(ax.get_yticklabels(), fontweight='bold')
     
     ax2 = ax.twiny()
     ita_min = (R*T/(4*F))*np.log(10**P_min/0.2)
@@ -211,8 +211,8 @@ def main():
     ax2.set_xticks(np.linspace(ita_min, ita_max, 9))
     ax2.set_xlim(ita_min, ita_max)
     ax2.set_xlabel(r'$\eta\;(\mathrm{V})$', fontdict=label_font)
-    ax2.set_xticklabels(ax2.get_xticks(), fontweight='bold')
     ax2.xaxis.set_major_formatter(mtick.FormatStrFormatter('%.2f'))
+    plt.setp(ax2.get_xticklabels(), fontweight='bold')
 
     os.makedirs('output', exist_ok=True)
     filename = f'output/surface_thermo_{T}K.png'

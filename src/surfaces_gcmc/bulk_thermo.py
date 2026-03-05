@@ -91,7 +91,7 @@ def main():
             testO = oxygen_chemical_potential(T, 10**P, mu_0_o2)
             c[-1] = testO 
             
-            res = linprog(c, A_eq=A_eq, b_eq=b_eq, bounds=bounds)
+            res = linprog(c, A_eq=A_eq, b_eq=b_eq, bounds=bounds, method='highs')
             
             if res.success:
                 if E_ABO3 - res.fun < 0:

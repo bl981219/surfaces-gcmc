@@ -11,8 +11,23 @@ requires-python = ">=3.9"
 authors = [
   { name = "Mengren Bill Liu" }
 ]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Chemistry",
+    "Topic :: Scientific/Engineering :: Physics"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/bl981219/surfaces-gcmc"
+"Bug Tracker" = "https://github.com/bl981219/surfaces-gcmc/issues"
+
 dependencies = [
     "numpy",
+    "scipy",
     "matplotlib",
     "pyyaml",
     "pymatgen>=2023.1.20",

@@ -83,10 +83,14 @@ class GCMCSampler:
             return Outcar(self.outcar_path).final_energy
         except Exception:
             if os.path.exists(self.outcar_path):
-                with open(self.outcar_path, 'r') as f:
-                    for line in reversed(f.readlines()):
+                import subprocess
+                try:
+                    result = subprocess.check_output(['tail', '-n', '500', self.outcar_path], text=True)
+                    for line in reversed(result.splitlines()):
                         if 'energy' in line:
                             return float(line.split()[-1])
+                except Exception:
+                    pass
         return None
 
     def write_poscar(self, structure, path):
@@ -224,9 +228,12 @@ class GCMCSampler:
         """Executes VASP on disk and retrieves the DFT energy."""
         self.write_poscar(structure, self.poscar_path)
         self.prepare_vasp_files()
-        exit_code = os.system(f"cd {self.work_dir} && {self.vasp_cmd}")
-        if exit_code != 0:
-            raise RuntimeError("VASP execution failed. Check vasp.out")
+        import subprocess
+        result = subprocess.run(f"cd {self.work_dir} && {self.vasp_cmd}", shell=True, capture_output=True, text=True)
+        if result.returncode != 0:
+            with open(os.path.join(self.work_dir, "vasp_error.log"), "w") as f:
+                f.write(result.stderr)
+            raise RuntimeError(f"VASP execution failed. Details logged to {self.work_dir}/vasp_error.log")
         return self.read_energy(), Structure.from_file(self.contcar_path)
 
     def execute_gcmc_loop(self, initial_poscar="POSCAR"):

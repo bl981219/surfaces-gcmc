@@ -74,7 +74,7 @@ Analyze the generated `CONTCAR` files in the `output/trajectory/` folder. Cluste
 Once your unique phases are organized, execute the thermodynamics script to generate the convex hull:
 
 ```bash
-surfaces-gcmc-thermo --config examples/example_config_1073K.yaml --data_dir ./examples/converged_structures/
+surfaces-surface-thermo --config examples/example_config_1073K.yaml --data_dir ./examples/converged_structures/
 ```
 This script will automatically crawl your directory, apply the bulk defect calibrations and mixing entropies, and output a unified `.png` phase diagram mapping the lowest-energy surfaces.
 

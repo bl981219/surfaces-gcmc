@@ -45,6 +45,11 @@ def main():
         print("Error: No data found in JSON.")
         return
     num_points = len(mu_data[elements[0]])
+    
+    # Validate array lengths
+    for el in elements:
+        if len(mu_data[el]) != num_points:
+            raise ValueError(f"CRITICAL: Array length mismatch. Element '{el}' has length {len(mu_data[el])}, expected {num_points}.")
 
     # 4. Evaluate and Write to File
     with open(output_file_path, 'w') as out_file:
