@@ -25,7 +25,7 @@ git clone https://github.com/bl981219/surfaces-gcmc.git
 cd surfaces-gcmc
 
 # 3. Install the package (Editable mode recommended for researchers)
-pip install -e .
+pip install .
 ```
 
 ## Quick Start (Reproducing Manuscript Figures)
