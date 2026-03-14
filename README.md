@@ -1,5 +1,9 @@
 # Surfaces-GCMC: Predicting Oxides Surface Atomic Structures
 
+<p align="center">
+  <img src="docs/assets/GCMC.png" width="800" title="GCMC Scheme">
+</p>
+
 This repository contains a multi-scale computational pipeline designed to predict surface reconstructions, terminations, and phase precipitates on complex doped perovskite oxides (e.g., La<sub>0.6</sub>Sr<sub>0.4</sub>FeO<sub>3-δ</sub>). It integrates Grand Canonical Monte Carlo (GCMC) sampling, Machine Learning Interatomic Potentials (ML-IAPs), and rigorous bulk-to-surface defect thermodynamics to generate highly accurate surface phase diagrams.
 
 ## Core Features
